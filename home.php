@@ -18,11 +18,15 @@ if ($_SESSION["loggedin"] == true)
     $id = $_SESSION["id"];
 
     echo "welkom". $_SESSION['username']."<a href='createserver.php'>create server</a><br><a href='joinserver.php'>join server</a>";
+
+    $conn->close();
 }
 else {
     header("Location: inlog.php");
     exit();
 }
 ?>
+<br>
+<a href="createserver.php">create server</a>
 </body>
 </html>

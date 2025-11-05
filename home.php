@@ -26,7 +26,6 @@ else {
     exit();
 }
 ?>
-<br>
-<a href="createserver.php">create server</a>
+
 </body>
 </html>

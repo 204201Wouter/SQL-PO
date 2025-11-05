@@ -28,21 +28,11 @@ if ($_SESSION["loggedin"]  == true)
 
 
 
-        $sql = "INSERT INTO servers (id, player1)
-        VALUES ("."'".$_SESSION['username']."'".",". $_SESSION['id'].")";
+        $sql = "INSERT INTO servers (id)
+        VALUES ('".$_SESSION['username']."')";
         $result = $conn->query($sql);
     }
 
-    echo "waiting for more players<br>";
-    $player1 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player1 FROM servers WHERE id = '$username')")->fetch_assoc();
-    echo "player 1: " . $player1['username'];
-    echo "<br>";
-
-    $player2 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player2 FROM servers WHERE id = '$username')")->fetch_assoc();
-    if ($player2 <> null) {
-        echo "player 2: " . $player2['username'];
-    }
-    else echo "player 2: not joined";
 
 
 

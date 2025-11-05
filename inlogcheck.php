@@ -37,6 +37,7 @@ if ($result->num_rows > 0) {
 
         $_SESSION['loggedin'] = true;
         $_SESSION['id'] = $id;
+        $_SESSION['username'] = $username;
         header("Location: home.php");
         exit();
     }

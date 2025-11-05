@@ -7,13 +7,49 @@ session_start();
 <?php
 if ($_SESSION["loggedin"]  == true)
 {
-    echo "welkom ". $_SESSION["id"];
+ 
     
+
+
+    // Create connection
+    $conn = new mysqli("localhost", "root", "", "zweeds pesten");
+    // Check connection
+    if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+    }
+
+    
+
+
+
+    $sql = "SELECT * FROM servers";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+            echo $row['id']."<a href="."lobby.php?id=".$row['id'].">join</a><br>"
+            ;
+        }
+        
+    }
+    else {
+        echo "no servers found :(";
+    }
+
+
+
+
+    $conn->close();
+    
+
+
+
+
+
 
 }
 else {
-      header("Location: inlog.php");
-       exit();
+    header("Location: inlog.php");
+    exit();
 }
 
 

@@ -7,7 +7,7 @@ session_start();
 <?php
 if ($_SESSION["loggedin"]  == true)
 {
-    echo "welkom ". $_SESSION["id"];
+
 
 
     
@@ -22,24 +22,27 @@ if ($_SESSION["loggedin"]  == true)
 
 
 
-    $sql = "SELECT * FROM servers WHERE id = ".$_SESSION['id'];
+    $sql = "SELECT * FROM servers WHERE id = "."'".$_SESSION['username']."'";
     $result = $conn->query($sql);
-    if ($result->num_rows < 1) {
+    if ($result->num_rows == 0) {
 
 
 
-    $sql = "INSERT INTO servers (id, player1)
-    VALUES (".$_SESSION['id'].",". $_SESSION['id'].")";
-    $result = $conn->query($sql);
+        $sql = "INSERT INTO servers (id, player1)
+        VALUES ("."'".$_SESSION['username']."'".",". $_SESSION['id'].")";
+        $result = $conn->query($sql);
     }
 
-    echo "waiting for more players";
+    
 
 
 
 
     $conn->close();
     
+    header("Location: lobby.php?id=".$_SESSION['username']);
+    exit();
+
 
 }
 else {

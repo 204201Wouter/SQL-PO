@@ -10,12 +10,19 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$result = $conn->query("SELECT * FROM users WHERE username = '$username'");
+$usersWithUsername = $conn->query("SELECT * FROM users WHERE username = '$username'");
 
-if ($result->num_rows > 0) {
+if ($usersWithUsername->num_rows > 0) {
     echo "username already taken";
 }
 else {
-    $conn->query("INSERT INTO users (id, username, password, admin) VALUES (101, $username, $password, false)");
+    $id = rand();
+    $usersWithId = $conn->query("SELECT * FROM users WHERE id = '$id'");
+    while ($usersWithId->num_rows > 0) {
+        $id = rand();
+        $usersWithId = $conn->query("SELECT * FROM users WHERE id = '$id'");
+    }
+    $conn->query("INSERT INTO users (id, username, password, admin) VALUES ('$id', '$username', '$password', 0)");
+    echo "account created";
 }
 ?>

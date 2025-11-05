@@ -25,8 +25,18 @@ if ($result->num_rows > 0) {
     if ($row["password"] == $password)
     {
         echo "succes login";
-        $_SESSION['loggedin']=true;
-        $_SESSION['id']=$row["id"];
+
+        $id = rand();
+        $usersWithId = $conn->query("SELECT * FROM users WHERE id = '$id'");
+        while ($usersWithId->num_rows > 0) {
+            $id = rand();
+            $usersWithId = $conn->query("SELECT * FROM users WHERE id = '$id'");
+        }
+
+        $conn->query("UPDATE users SET id = '$id' WHERE username = '$username'");
+
+        $_SESSION['loggedin'] = true;
+        $_SESSION['id'] = $id;
         header("Location: home.php");
         exit();
     }

@@ -7,7 +7,7 @@
             <input type="text" id="password" name="password"><br><br>
             <input type="submit" value="Submit">
         </form>
-        <a href="new account.php">new account</a>
+        <a href="newaccount.php">new account</a>
         
         <?php
             if (isset($_GET["login"]) && $_GET["login"] == 'incorrect') {

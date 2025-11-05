@@ -1,9 +1,9 @@
 <?php
-
 session_start();
 ?>
+
 <html>
-    <body>
+<body>
 <?php
 if ($_SESSION["loggedin"]  == true)
 {

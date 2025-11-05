@@ -1,18 +1,12 @@
 <html>
     <body>
-        <form method="POST" action="inlogcheck.php">
+        <form method="POST" action="newaccountcheck.php">
             <label for="username">Username:</label><br>
             <input type="text" id="username" name="username"><br>
             <label for="password">Password:</label><br>
             <input type="text" id="password" name="password"><br><br>
             <input type="submit" value="Submit">
         </form>
-        <a href="new account.php">new account</a>
-        
-        <?php
-            if (isset($_GET["login"]) && $_GET["login"] == 'incorrect') {
-                echo "incorrect username or password";
-            }
-        ?>
+        <a href="inlog.php">login</a>
     </body>
 </html>

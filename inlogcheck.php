@@ -1,5 +1,3 @@
-
-
 <?php 
 
 
@@ -16,15 +14,13 @@ $password = htmlspecialchars($_POST["password"]);
 $conn = new mysqli("localhost", "root", "", "zweeds pesten");
 // Check connection
 if ($conn->connect_error) {
-  die("Connection failed: " . $conn->connect_error);
+    die("Connection failed: " . $conn->connect_error);
 }
 
 $sql = "SELECT * FROM users WHERE username = '$username'";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
-
-
     $row = $result->fetch_assoc();
     if ($row["password"] == $password)
     {
@@ -32,20 +28,18 @@ if ($result->num_rows > 0) {
         $_SESSION['loggedin']=true;
         $_SESSION['id']=$row["id"];
         header("Location: home.php");
-         exit();
-    } else {
-echo "incorrect username or password";
-header("Location: inlog.php?login=incorrect");
- exit();
+        exit();
+    }
+    else {
+        echo "incorrect username or password";
+        header("Location: inlog.php?login=incorrect");
+        exit();
+    } 
 }
-
-  
-
-
-} else {
-  echo "incorrect username or password";
-  header("Location: inlog.php?login=incorrect");
-   exit();
+else {
+    echo "incorrect username or password";
+    header("Location: inlog.php?login=incorrect");
+    exit();
 }
   
 $conn->close();

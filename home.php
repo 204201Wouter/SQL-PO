@@ -1,24 +1,28 @@
 <?php
-
 session_start();
 ?>
+
 <html>
-    <body>
+<body>
 <?php
-if ($_SESSION["loggedin"]  == true)
+
+
+if ($_SESSION["loggedin"] == true)
 {
-    echo "welkom ". $_SESSION["id"]. "<a href='createserver.php'>createserver</a><br><a href='joinserver.php'>joinserver</a>";
+    $conn = new mysqli("localhost", "root", "", "zweeds pesten");
 
-    
-    
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
 
+    $id = $_SESSION["id"];
+    $username = $conn->query("SELECT * FROM users WHERE id = '$id'")->fetch_assoc()['username'];
+    echo "welkom $username";
 }
 else {
-      header("Location: inlog.php");
-       exit();
+    header("Location: inlog.php");
+    exit();
 }
-
-
 ?>
 </body>
 </html>

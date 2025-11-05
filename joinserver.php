@@ -7,9 +7,7 @@ session_start();
 <?php
 if ($_SESSION["loggedin"]  == true)
 {
-    echo "welkom ". $_SESSION["id"]. "<a href='createserver.php'>createserver</a><br><a href='joinserver.php'>joinserver</a>";
-
-    
+    echo "welkom ". $_SESSION["id"];
     
 
 }

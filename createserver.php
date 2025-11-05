@@ -7,51 +7,43 @@ session_start();
 <?php
 if ($_SESSION["loggedin"]  == true)
 {
-    echo "welkom ". $_SESSION["id"];
-
-
-    
-
-
     // Create connection
     $conn = new mysqli("localhost", "root", "", "zweeds pesten");
     // Check connection
     if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+        die("Connection failed: " . $conn->connect_error);
     }
 
+    $id = $_SESSION["id"];
+    $username = $conn->query("SELECT * FROM users WHERE id = '$id'")->fetch_assoc()['username'];
+    echo "welkom $username";
+    echo "<br>";
 
-
-    $sql = "SELECT * FROM servers WHERE id = ".$_SESSION['id'];
-    $result = $conn->query($sql);
-    if ($result->num_rows < 1) {
-
-
-
-    $sql = "INSERT INTO servers (id, player1)
-    VALUES (".$_SESSION['id'].",". $_SESSION['id'].")";
-    $result = $conn->query($sql);
+    $result = $conn->query("SELECT * FROM servers WHERE id = '$id'");
+    if ($result->num_rows == 0) {
+        $sql = "INSERT INTO servers (id, player1) VALUES ('$username','$id')";
+        $result = $conn->query($sql);
     }
 
-    echo "waiting for more players";
+    echo "waiting for more players<br>";
+    $player1 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player1 FROM servers WHERE id = '$username')")->fetch_assoc();
+    echo "player 1: " . $player1['username'];
+    echo "<br>";
 
+    $player2 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player2 FROM servers WHERE id = '$username')")->fetch_assoc();
+    if ($player2 <> null) {
+        echo "player 2: " . $player2['username'];
+    }
+    else echo "player 2: not joined";
 
 
 
     $conn->close();
-    
-
 }
 else {
-      header("Location: inlog.php");
-       exit();
+    header("Location: inlog.php");
+    exit();
 }
-
-
-
-
-
-
 ?>
 </body>
 </html>

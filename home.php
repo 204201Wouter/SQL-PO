@@ -18,11 +18,15 @@ if ($_SESSION["loggedin"] == true)
     $id = $_SESSION["id"];
     $username = $conn->query("SELECT * FROM users WHERE id = '$id'")->fetch_assoc()['username'];
     echo "welkom $username";
+
+    $conn->close();
 }
 else {
     header("Location: inlog.php");
     exit();
 }
 ?>
+<br>
+<a href="createserver.php">create server</a>
 </body>
 </html>

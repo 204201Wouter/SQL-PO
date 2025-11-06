@@ -17,7 +17,7 @@ if ($_SESSION["loggedin"] == true)
 
     $id = $_SESSION["id"];
 
-    echo "welkom". $_SESSION['username']."<a href='createserver.php'>create server</a><br><a href='joinserver.php'>join server</a>";
+    echo "welkom". $_SESSION['username']."<a href='createserver.php'>create server</a><br><a href='findserver.php'>join server</a>";
 
     $conn->close();
 }

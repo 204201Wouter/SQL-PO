@@ -21,23 +21,42 @@ if ($_SESSION["loggedin"]  == true)
     
 
 
+    
 
-    $sql = "SELECT * FROM servers";
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-            echo $row['id']."<a href="."lobby.php?id=".$row['id'].">join</a><br>"
-            ;
+    $player1 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player1 FROM servers WHERE id = '".$_GET["id"]."')")->fetch_assoc();
+    if ($player1 == null) {
+
+        $sql = "UPDATE servers SET player1 = '". $_SESSION['id']."' WHERE id = '".$_GET['id']."'";
+
+        $result = $conn->query($sql);
+  
+        header("Location: lobby.php?id=".$_GET['id']);
+        exit();
+
+    }
+    else {
+
+        $player2 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player2 FROM servers WHERE id = '".$_GET["id"]."')")->fetch_assoc();
+        if ($player2 == null) {
+
+            $sql = "UPDATE servers SET player2 = '". $_SESSION['id']."' WHERE id = '".$_GET['id']."'";
+           
+            $result = $conn->query($sql);
+
+        
+            header("Location: lobby.php?id=".$_GET['id']);
+            exit();
+
         }
         
     }
-    else {
-        echo "no servers found :(";
-    }
+
+    
 
 
 
 
+    
     $conn->close();
     
 

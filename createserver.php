@@ -38,7 +38,7 @@ if ($_SESSION["loggedin"]  == true)
 
     $conn->close();
     
-    header("Location: lobby.php?id=".$_SESSION['username']);
+    header("Location: joinserver.php?id=".$_SESSION['username']);
     exit();
 
 

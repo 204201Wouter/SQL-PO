@@ -31,7 +31,9 @@ if ($_SESSION["loggedin"]  == true)
     }
         
 
+    $sql = "UPDATE players SET id =". $_SESSION['id']." WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1";
 
+    $result = $conn->query($sql);
     
 
     $player1 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player1 FROM servers WHERE id = '".$_GET["id"]."')")->fetch_assoc();

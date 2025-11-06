@@ -33,13 +33,31 @@ if ($_SESSION["loggedin"]  == true)
         $cards[] = $i;
         }
 
+        shuffle($cards);
+
+        for ($i = 0; $i < 3; $i++) {
+            $player1hand[] = array_shift($cards);
+            $player2hand[] = array_shift($cards);
+        }
+
+
 
         $sql = "INSERT INTO servers (id, stapel)
         VALUES ('".$_SESSION['username']."','".json_encode($cards)."')";
         $result = $conn->query($sql);
 
-            header("Location: joinserver.php?id=".$_SESSION['username']);
-            exit();
+        
+
+        $sql = "INSERT INTO players (hand, gameid)
+        VALUES ('".json_encode($player1hand)."','".$_SESSION['username']."')";
+        $result = $conn->query($sql);
+        $sql = "INSERT INTO players (hand, gameid)
+        VALUES ('".json_encode($player2hand)."','".$_SESSION['username']."')";
+        $result = $conn->query($sql);
+
+
+        header("Location: joinserver.php?id=".$_SESSION['username']);
+        exit();
 
 
     }

@@ -19,9 +19,13 @@ if ($_SESSION["loggedin"]  == true)
     }
 
     // leave currents servers user
-     $sql = "DELETE FROM servers WHERE player1='".$_SESSION['id']."' OR player2='".$_SESSION['id']."'";
+
+     $sql = "DELETE FROM players WHERE gameid=(SELECT id FROM servers WHERE player1='".$_SESSION['id']."' OR player2='".$_SESSION['id']."')";
        $result = $conn->query($sql);
   
+     $sql = "DELETE FROM servers WHERE player1='".$_SESSION['id']."' OR player2='".$_SESSION['id']."'";
+       $result = $conn->query($sql);
+
 
     
 

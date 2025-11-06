@@ -35,7 +35,10 @@ if ($game->num_rows == 0)
 }
 $game = $game->fetch_assoc();
 
-echo "jouw kaarten: <br>"."";
+
+$kaarten = $conn->query("SELECT hand FROM players WHERE id = '".$_SESSION['id']."'")->fetch_assoc()['hand'];
+
+echo "jouw kaarten: <br>".$kaarten;
 
 
 

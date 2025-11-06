@@ -1,3 +1,7 @@
+<form method="post">
+  <button type="submit" name="runFunction">Delete servers</button>
+</form>
+
 <?php
 session_start();
 
@@ -7,8 +11,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$reset = true;
-if ($reset) {
+function test() {
+    global $conn;
     $conn->query("DELETE FROM servers");
+}
+
+if (isset($_POST['runFunction'])) {
+    test();
 }
 ?>

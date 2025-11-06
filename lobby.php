@@ -45,7 +45,7 @@ if ($_SESSION["loggedin"]  == true)
 
 
     if ($player1joined && $player2joined) {
-        $conn->query("UPDATE servers SET turn = '$player1' WHERE id = '".$_GET["id"]."'");
+        $conn->query("UPDATE servers SET turn = ".$player1['id']." WHERE id = '".$_GET["id"]."'");
         header("Location: game.php?id=".$_GET["id"]);
         exit();
     }

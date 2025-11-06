@@ -9,6 +9,6 @@ if ($conn->connect_error) {
 $gameid = $_GET["id"];
 
 echo "dit is een prachtige game";
-$turn = $conn->query("SELECT turn FROM servers WHERE id = '$gameid'")->fetch_assoc();
+$turn = implode(', ', $conn->query("SELECT turn FROM servers WHERE id = '$gameid'")->fetch_assoc());
 echo "<br>$turn"
 ?>

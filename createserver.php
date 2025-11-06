@@ -27,20 +27,31 @@ if ($_SESSION["loggedin"]  == true)
     if ($result->num_rows == 0) {
 
 
+        $cards = [];
+        for ($i = 0; $i<54;$i++)
+        {
+        $cards[] = $i;
+        }
 
-        $sql = "INSERT INTO servers (id)
-        VALUES ('".$_SESSION['username']."')";
+
+        $sql = "INSERT INTO servers (id, stapel)
+        VALUES ('".$_SESSION['username']."','".json_encode($cards)."')";
         $result = $conn->query($sql);
+
+            header("Location: joinserver.php?id=".$_SESSION['username']);
+            exit();
+
+
     }
+
+    header("Location: lobby.php?id=".$_SESSION['username']);
+    exit();
 
 
 
 
     $conn->close();
     
-    header("Location: joinserver.php?id=".$_SESSION['username']);
-    exit();
-
 
 }
 else {

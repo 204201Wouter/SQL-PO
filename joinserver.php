@@ -18,7 +18,18 @@ if ($_SESSION["loggedin"]  == true)
     die("Connection failed: " . $conn->connect_error);
     }
 
+    $gameid = $_GET['id'];
+    $playerid = $_SESSION['id'];
+
+    $game = $conn->query("SELECT * FROM servers WHERE id = '$gameid'");
+
+    if ($game->num_rows == 0) 
+    {
     
+        header("Location: home.php");
+        exit();
+    }
+        
 
 
     
@@ -50,6 +61,9 @@ if ($_SESSION["loggedin"]  == true)
         }
         
     }
+
+
+
 
     
 

@@ -18,11 +18,16 @@ if ($_SESSION["loggedin"]  == true)
     die("Connection failed: " . $conn->connect_error);
     }
 
+    // leave currents servers user
+     $sql = "DELETE FROM servers WHERE player1='".$_SESSION['id']."' OR player2='".$_SESSION['id']."'";
+       $result = $conn->query($sql);
+  
+
     
 
 
 
-    $sql = "SELECT * FROM servers";
+    $sql = "SELECT * FROM servers WHERE player1=0 OR player2=0";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {

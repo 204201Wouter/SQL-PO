@@ -2,24 +2,50 @@
   <input type="number" name="move" placeholder="move (invullen doet nog niks)">
   <button type="submit" name="playMove">Play Move</button>
 </form>
-<meta http-equiv="refresh" content="2">
+
 
 <?php 
 session_start();
+
+if ($_SESSION["loggedin"]  == true)
+{
+
+
+ 
+    
+
 
 $conn = new mysqli("localhost", "root", "", "zweeds pesten");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+
+
 $gameid = $_GET['id'];
 $playerid = $_SESSION['id'];
 
-echo "dit is een prachtige game";
-$game = $conn->query("SELECT * FROM servers WHERE id = '$gameid'")->fetch_assoc();
+$game = $conn->query("SELECT * FROM servers WHERE id = '$gameid'");
+
+if ($game->num_rows == 0) 
+{
+  
+    header("Location: home.php");
+    exit();
+}
+$game = $game->fetch_assoc();
+
+echo "jouw kaarten: <br>"."";
+
+
+
+
 $turn = $game['turn'];
 $turnName = $conn->query("SELECT username FROM users WHERE id = '$turn'")->fetch_assoc()['username'];
-echo "<br>$turnName is aan de beurt";
+if ($turnName == $_SESSION['username'])
+    echo "<br>Jij bent aan de beurt";
+else
+echo "<br>$turnName is aan de beurt<meta http-equiv='refresh' content='2'>";
 
 
 function playmove(int $move) {
@@ -43,4 +69,10 @@ if (isset($_POST['playMove'])) {
     $value = intval($_POST['move']);
     playmove($value);
 }
+}
+else {
+    header("Location: inlog.php");
+    exit();
+}
+
 ?>

@@ -24,12 +24,14 @@ if ($_SESSION["loggedin"]  == true)
 
 
 
-
+    $player1joined = false;
+    $player2joined = false;
 
     echo "waiting for more players<br>";
     $player1 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player1 FROM servers WHERE id = '".$_GET["id"]."')")->fetch_assoc();
     if ($player1 <> null) {
         echo "player 1: " . $player1['username'];
+        $player1joined = true;
     }
     else echo "player 1: not joined";
     echo "<br>";
@@ -37,20 +39,19 @@ if ($_SESSION["loggedin"]  == true)
     $player2 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player2 FROM servers WHERE id = '".$_GET["id"]."')")->fetch_assoc();
     if ($player2 <> null) {
         echo "player 2: " . $player2['username'];
+        $player2joined = true;
     }
     else echo "player 2: not joined";
 
 
-
-
-
-
-    
-
+    if ($player1joined && $player2joined) {
+        header("Location: game.php?id=".$_GET["id"]);
+        exit();
+    }
 }
 else {
-      header("Location: inlog.php");
-       exit();
+    header("Location: inlog.php");
+    exit();
 }
 
 

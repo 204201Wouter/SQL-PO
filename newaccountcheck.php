@@ -24,5 +24,11 @@ else {
     }
     $conn->query("INSERT INTO users (id, username, password, admin) VALUES ('$id', '$username', '$password', 0)");
     echo "account created";
+
+    $_SESSION['loggedin'] = true;
+    $_SESSION['id'] = $id;
+    $_SESSION['username'] = $username;
+    header("Location: home.php");
+    exit();
 }
 ?>

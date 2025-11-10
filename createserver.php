@@ -42,7 +42,7 @@ if ($_SESSION["loggedin"]  == true)
 
 
 
-        $sql = "INSERT INTO servers (id, stapel)
+        $sql = "INSERT INTO servers (id, pakstapel)
         VALUES ('".$_SESSION['username']."','".json_encode($cards)."')";
         $result = $conn->query($sql);
 

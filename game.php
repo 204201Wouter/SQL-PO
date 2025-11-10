@@ -38,7 +38,17 @@ $game = $game->fetch_assoc();
 
 $kaarten = $conn->query("SELECT hand FROM players WHERE id = '".$_SESSION['id']."'")->fetch_assoc()['hand'];
 
-echo "jouw kaarten: <br>".$kaarten;
+echo "jouw kaarten: <br>".$kaarten."<br>";
+$kaarten = json_decode($kaarten);
+
+$stapel = $game['stapel'];
+echo "stapel: <br>".$stapel."<br>";
+$stapel = json_decode($stapel);
+
+
+$pakstapel = json_decode($game['pakstapel']);
+
+
 
 
 
@@ -50,6 +60,13 @@ if ($turnName == $_SESSION['username'])
 else
 echo "<br>$turnName is aan de beurt<meta http-equiv='refresh' content='2'>";
 
+function valid(int $move) {
+    $kaarten = json_decode($conn->query("SELECT hand FROM players WHERE id = '".$_SESSION['id']."'")->fetch_assoc()['hand']);
+    return ;
+    
+
+}
+
 
 function playmove(int $move) {
     global $conn;
@@ -57,13 +74,40 @@ function playmove(int $move) {
     global $turn;
     global $gameid;
     global $playerid;
+    global $kaarten;
+    global $stapel;
+    global $pakstapel;
 
     if ($game['player1'] == $playerid) $nextplayerid = $game['player2'];
     else $nextplayerid = $game['player1'];
 
-    if ($playerid == $turn) {
+
+    $bovenstekaart = end($stapel);
+
+    if ($playerid == $turn && in_array($move, $kaarten) && ) {//$move > $bovenstekaart) {
         // move spul
         $conn->query("UPDATE servers SET turn = ".$nextplayerid." WHERE id = '$gameid'");
+        $stapel[] = $move;
+        array_splice($kaarten, array_search($move, $kaarten),1); 
+
+        
+        if (count($kaarten) < 3)
+        {
+            $kaarten[] = array_shift($pakstapel);
+        }
+      
+
+
+
+
+
+        $stapel = json_encode($stapel);
+        $kaarten = json_encode($kaarten);
+        $pakstapel = json_encode($pakstapel);
+        
+        $conn->query("UPDATE servers SET stapel = '$stapel' WHERE id = '$gameid'");
+        $conn->query("UPDATE servers SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
+        $conn->query("UPDATE players SET hand = '$kaarten' WHERE id = '".$_SESSION['id']."'");
         header("Refresh:0");
     }
 }

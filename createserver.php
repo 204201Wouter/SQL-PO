@@ -30,7 +30,7 @@ if ($_SESSION["loggedin"]  == true)
         $cards = [];
         for ($i = 0; $i<54;$i++)
         {
-        $cards[] = $i;
+            $cards[] = $i;
         }
 
         shuffle($cards);

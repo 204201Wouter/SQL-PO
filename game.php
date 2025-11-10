@@ -48,13 +48,6 @@ $stapel = json_decode($stapel);
 
 $pakstapel = json_decode($game['pakstapel']);
 
-$bovenstekaartid = end($stapel);
-$bovenstekaart = getkaartfromid($bovenstekaart);
-$i = 1;
-//while ($bovenstekaart == 1 && $bovenstekaart == 13) {
-//    $bovenstekaart = getkaartfromid($bovenstekaart);
-//}
-
 $turn = $game['turn'];
 $turnName = $conn->query("SELECT username FROM users WHERE id = '$turn'")->fetch_assoc()['username'];
 if ($turnName == $_SESSION['username'])
@@ -72,15 +65,36 @@ function getkaartfromid($kaartid) {
     else return $kaartid % 13;
 }
 
+if (count($stapel) > 0) {
+    $bovenstekaartid = end($stapel);
+    $bovenstekaart = getkaartfromid($bovenstekaartid);
+    $i = 2;
+    while ($bovenstekaart == 1 || $bovenstekaart == 13) {
+        $bovenstekaart = getkaartfromid($stapel[count($stapel) - $i]);
+        $i++;
+    }
+}
+else {
+    $bovenstekaartid = -1; // lege stapel dus geen kaart
+    $bovenstekaart = -1;
+}
+
 function valid(int $move) {
     global $kaarten;
     global $bovenstekaart;
 
+    // als je kaart niet hebt
     if (!in_array($move, $kaarten)) return false;
 
     $kaart = getkaartfromid($move);
+
+    // als kaart 2, 3 of joker is
+    if ($kaart == 1 || $kaart == 13 || $kaart == 0) return true;
     
-    return true;
+    // als bovenste kaart 7 is
+    if ($bovenstekaart == 5) return $kaart < $bovenstekaart;
+
+    return $kaart > $bovenstekaart;
 }
 
 

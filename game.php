@@ -1,5 +1,5 @@
 <form method="post">
-  <input type="number" name="move" placeholder="move (invullen doet nog niks)">
+  <input type="number" name="move" placeholder="move">
   <button type="submit" name="playMove">Play Move</button>
 </form>
 
@@ -48,10 +48,12 @@ $stapel = json_decode($stapel);
 
 $pakstapel = json_decode($game['pakstapel']);
 
-
-
-
-
+$bovenstekaartid = end($stapel);
+$bovenstekaart = getkaartfromid($bovenstekaart);
+$i = 1;
+//while ($bovenstekaart == 1 && $bovenstekaart == 13) {
+//    $bovenstekaart = getkaartfromid($bovenstekaart);
+//}
 
 $turn = $game['turn'];
 $turnName = $conn->query("SELECT username FROM users WHERE id = '$turn'")->fetch_assoc()['username'];
@@ -60,11 +62,25 @@ if ($turnName == $_SESSION['username'])
 else
 echo "<br>$turnName is aan de beurt<meta http-equiv='refresh' content='2'>";
 
-function valid(int $move) {
-    $kaarten = json_decode($conn->query("SELECT hand FROM players WHERE id = '".$_SESSION['id']."'")->fetch_assoc()['hand']);
-    return ;
-    
+// ------ IDs KAARTEN -------
+// 0-12: HARTEN, 13-25: RUITEN, 26-38: SCHOPPEN, 39-51: KLAVERS
+// volgorde: 2 t/m 10, B, V, K, A
+// 52 en 53 zijn jokers
 
+function getkaartfromid($kaartid) {
+    if ($kaartid > 51) return 13;
+    else return $kaartid % 13;
+}
+
+function valid(int $move) {
+    global $kaarten;
+    global $bovenstekaart;
+
+    if (!in_array($move, $kaarten)) return false;
+
+    $kaart = getkaartfromid($move);
+    
+    return true;
 }
 
 
@@ -77,15 +93,14 @@ function playmove(int $move) {
     global $kaarten;
     global $stapel;
     global $pakstapel;
+    global $bovenstekaart;
 
     if ($game['player1'] == $playerid) $nextplayerid = $game['player2'];
     else $nextplayerid = $game['player1'];
 
 
-    $bovenstekaart = end($stapel);
+    if ($playerid == $turn && valid($move)) {
 
-    if ($playerid == $turn && in_array($move, $kaarten) && ) {//$move > $bovenstekaart) {
-        // move spul
         $conn->query("UPDATE servers SET turn = ".$nextplayerid." WHERE id = '$gameid'");
         $stapel[] = $move;
         array_splice($kaarten, array_search($move, $kaarten),1); 

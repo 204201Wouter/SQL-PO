@@ -1,8 +1,33 @@
+<body style="background-color:#008531;">
 <form method="post">
-  <input type="text" name="move" placeholder="move">
+  <input type="text" name="move" placeholder="move" id="input" value="[]">
   <button type="submit" name="playMove">Play Move</button>
 </form>
 
+<script>
+    function insert(text)
+    {
+        const input = document.getElementById('input');
+
+     
+        try {
+            let array = JSON.parse(input.value);
+            console.log(array);
+
+            
+            if (!array.includes(text)) {
+                array.push(text);
+                console.log(array);
+                input.value = JSON.stringify(array);
+            }
+            
+        } catch (e) {
+            console.error(e);
+        }
+
+
+    }
+</script>
 
 <?php 
 session_start();
@@ -37,8 +62,10 @@ echo "jouw kaarten: <br>".$kaarten."<br>";
 $kaarten = json_decode($kaarten);
 foreach ($kaarten as $kaart)
 {
-echo "<img src='images/".$kaart.".svg'>";
+echo "<button onclick='insert($kaart)'><img src='images/".$kaart.".svg' style=height:100px;></button>";
 }
+
+
 
 
 $stapel = $game['stapel'];
@@ -68,7 +95,7 @@ function getkaartfromid($kaartid) {
 if (count($stapel) > 0) {
     $bovenstekaartid = end($stapel);
     $bovenstekaart = getkaartfromid($bovenstekaartid);
-    echo "<img src='images/".$bovenstekaartid.".svg'> <br>";
+    echo "<img src='images/".$bovenstekaartid.".svg' style=height:100px;> <br>";
 
 
     $i = 2;
@@ -153,7 +180,7 @@ function playmove(array $move) {
             array_splice($kaarten, array_search($movekaart, $kaarten),1); 
         }
         
-        if (count($kaarten) < 3)
+        while (count($kaarten) < 3)
         {
             $kaarten[] = array_shift($pakstapel);
         }
@@ -213,3 +240,4 @@ else {
 }
 
 ?>
+</body>

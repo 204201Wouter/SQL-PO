@@ -35,6 +35,11 @@ $kaarten = $conn->query("SELECT hand FROM players WHERE id = '".$_SESSION['id'].
 
 echo "jouw kaarten: <br>".$kaarten."<br>";
 $kaarten = json_decode($kaarten);
+foreach ($kaarten as $kaart)
+{
+echo "<img src='images/".$kaart.".svg'>";
+}
+
 
 $stapel = $game['stapel'];
 echo "stapel: <br>".$stapel."<br>";
@@ -63,6 +68,9 @@ function getkaartfromid($kaartid) {
 if (count($stapel) > 0) {
     $bovenstekaartid = end($stapel);
     $bovenstekaart = getkaartfromid($bovenstekaartid);
+    echo "<img src='images/".$bovenstekaartid.".svg'> <br>";
+
+
     $i = 2;
     while ($bovenstekaart == 1 || $bovenstekaart == 13) {
         $bovenstekaart = getkaartfromid($stapel[count($stapel) - $i]);

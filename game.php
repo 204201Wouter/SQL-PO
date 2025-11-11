@@ -1,5 +1,5 @@
 <form method="post">
-  <input type="number" name="move" placeholder="move">
+  <input type="text" name="move" placeholder="move">
   <button type="submit" name="playMove">Play Move</button>
 </form>
 
@@ -9,11 +9,6 @@ session_start();
 
 if ($_SESSION["loggedin"]  == true)
 {
-
-
- 
-    
-
 
 $conn = new mysqli("localhost", "root", "", "zweeds pesten");
 if ($conn->connect_error) {
@@ -79,14 +74,16 @@ else {
     $bovenstekaart = -1;
 }
 
-function valid(int $move) {
+function valid(array $move) {
     global $kaarten;
     global $bovenstekaart;
 
-    // als je kaart niet hebt
-    if (!in_array($move, $kaarten)) return false;
+    $kaart = getkaartfromid($move[0]);
 
-    $kaart = getkaartfromid($move);
+    // als je kaart niet hebt
+    foreach ($move as $movekaart) {
+        if (!in_array($movekaart, $kaarten) || getkaartfromid($movekaart) != $kaart) return false;
+    }
 
     // als kaart 2, 3 of joker is
     if ($kaart == 1 || $kaart == 13 || $kaart == 0) return true;
@@ -98,7 +95,7 @@ function valid(int $move) {
 }
 
 
-function playmove(int $move) {
+function playmove(array $move) {
     global $conn;
     global $game;
     global $turn;
@@ -116,19 +113,15 @@ function playmove(int $move) {
     if ($playerid == $turn && valid($move)) {
 
         $conn->query("UPDATE servers SET turn = ".$nextplayerid." WHERE id = '$gameid'");
-        $stapel[] = $move;
-        array_splice($kaarten, array_search($move, $kaarten),1); 
-
+        foreach ($move as $movekaart) {
+            $stapel[] = $movekaart;
+            array_splice($kaarten, array_search($movekaart, $kaarten),1); 
+        }
         
         if (count($kaarten) < 3)
         {
             $kaarten[] = array_shift($pakstapel);
         }
-      
-
-
-
-
 
         $stapel = json_encode($stapel);
         $kaarten = json_encode($kaarten);
@@ -142,8 +135,8 @@ function playmove(int $move) {
 }
 
 if (isset($_POST['playMove'])) {
-    $value = intval($_POST['move']);
-    playmove($value);
+    $value = $_POST['move'];
+    playmove(json_decode($value));
 }
 }
 else {

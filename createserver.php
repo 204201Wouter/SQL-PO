@@ -30,7 +30,7 @@ if ($_SESSION["loggedin"]  == true)
         $cards = [];
         for ($i = 0; $i<54;$i++)
         {
-        $cards[] = $i;
+            $cards[] = $i;
         }
 
         shuffle($cards);
@@ -42,8 +42,8 @@ if ($_SESSION["loggedin"]  == true)
 
 
 
-        $sql = "INSERT INTO servers (id, pakstapel)
-        VALUES ('".$_SESSION['username']."','".json_encode($cards)."')";
+        $sql = "INSERT INTO servers (id, stapel, pakstapel)
+        VALUES ('".$_SESSION['username']."', '".json_encode([])."', '".json_encode($cards)."')";
         $result = $conn->query($sql);
 
         

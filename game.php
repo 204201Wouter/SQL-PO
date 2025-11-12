@@ -1,3 +1,23 @@
+<head>
+    <style>
+        .card {
+            padding: 0;
+            background-color: transparent;
+        
+            border: none;
+         
+
+        }
+        #hand {
+          
+            position: fixed;
+            left: calc(50% - 100px);
+            bottom: 10;
+
+        }
+    </style>
+</head>
+
 <body style="background-color:#008531;">
 <form method="post">
   <input type="text" name="move" placeholder="move" id="input" value="[]">
@@ -24,6 +44,7 @@
         } catch (e) {
             console.error(e);
         }
+        
 
 
     }
@@ -60,10 +81,13 @@ $kaarten = $conn->query("SELECT hand FROM players WHERE id = '".$_SESSION['id'].
 
 echo "jouw kaarten: <br>".$kaarten."<br>";
 $kaarten = json_decode($kaarten);
+
+echo "<div id='hand'>";
 foreach ($kaarten as $kaart)
 {
-echo "<button onclick='insert($kaart)'><img src='images/".$kaart.".svg' style=height:100px;></button>";
+echo "<button class='card' onclick='insert($kaart)'><img src='images/".$kaart.".svg' style='height:100px;'></button>";
 }
+echo "</div>";
 
 
 

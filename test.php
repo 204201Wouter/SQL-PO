@@ -14,6 +14,7 @@ if ($conn->connect_error) {
 function test() {
     global $conn;
     $conn->query("DELETE FROM servers");
+    $conn->query("DELETE FROM players");
 }
 
 if (isset($_POST['runFunction'])) {

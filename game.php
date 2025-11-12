@@ -95,14 +95,17 @@ function getkaartfromid($kaartid) {
 if (count($stapel) > 0) {
     $bovenstekaartid = end($stapel);
     $bovenstekaart = getkaartfromid($bovenstekaartid);
-    echo "<img src='images/".$bovenstekaartid.".svg' style=height:100px;> <br>";
+    echo "<br>$bovenstekaartid <br><img src='images/".$bovenstekaartid.".svg' style=height:100px;> <br>";
 
 
     $i = 2;
     while ($bovenstekaart == 1 || $bovenstekaart == 13) {
         $bovenstekaart = getkaartfromid($stapel[count($stapel) - $i]);
+        echo "<img src='images/".$stapel[count($stapel) - $i].".svg' style=height:100px;> <br>";
         $i++;
+        
     }
+    
 }
 else {
     $bovenstekaartid = -1; // lege stapel dus geen kaart

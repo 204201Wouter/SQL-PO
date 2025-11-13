@@ -289,12 +289,17 @@ function playmove(array $move) {
     }
 }
 
+function botMove() {
+    // bot logic hier
+    
+}
+
 if (isset($_POST['playMove'])) {
     $value = $_POST['move'];
     $array = json_decode($value);
     if (is_array($array) || true)
     {
-    playmove(json_decode($value));
+        playmove(json_decode($value));
     }
 }
 }

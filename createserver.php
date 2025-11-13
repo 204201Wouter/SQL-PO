@@ -7,12 +7,6 @@ session_start();
 <?php
 if ($_SESSION["loggedin"]  == true)
 {
-
-
-
-    
-
-
     // Create connection
     $conn = new mysqli("localhost", "root", "", "zweeds pesten");
     // Check connection
@@ -38,6 +32,8 @@ if ($_SESSION["loggedin"]  == true)
         for ($i = 0; $i < 3; $i++) {
             $player1hand[] = array_shift($cards);
             $player2hand[] = array_shift($cards);
+            $player3hand[] = array_shift($cards);
+            $player4hand[] = array_shift($cards);
         }
 
 
@@ -53,6 +49,12 @@ if ($_SESSION["loggedin"]  == true)
         $result = $conn->query($sql);
         $sql = "INSERT INTO players (hand, gameid)
         VALUES ('".json_encode($player2hand)."','".$_SESSION['username']."')";
+        $result = $conn->query($sql);
+        $sql = "INSERT INTO players (hand, gameid)
+        VALUES ('".json_encode($player3hand)."','".$_SESSION['username']."')";
+        $result = $conn->query($sql);
+        $sql = "INSERT INTO players (hand, gameid)
+        VALUES ('".json_encode($player4hand)."','".$_SESSION['username']."')";
         $result = $conn->query($sql);
 
 

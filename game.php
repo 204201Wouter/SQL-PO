@@ -5,15 +5,24 @@
             background-color: transparent;
         
             border: none;
+            margin: 5px;
          
 
+        }
+        .card:active {
+        transform: translateY(4px);
         }
         #hand {
           
             position: fixed;
-            left: calc(50% - 100px);
+            left: calc(50% - 125px);
             bottom: 10;
 
+        }
+        #stapel {
+            position: fixed;
+            left: calc(50% - 125px);
+            top: calc(50% - 125px);; 
         }
     </style>
 </head>
@@ -28,23 +37,36 @@
     function insert(text)
     {
         const input = document.getElementById('input');
+        const card = document.getElementById(text);
 
+        function getkaartfromid(kaartid) {
+            if (kaartid > 51) return 13;
+            else return kaartid % 13;
+        }
      
         try {
             let array = JSON.parse(input.value);
             console.log(array);
 
             
-            if (!array.includes(text)) {
+            if (!array.includes(text) && (array.length == 0 || (array.length > 0 && getkaartfromid(array[0]) == getkaartfromid(text) ) )) {
                 array.push(text);
                 console.log(array);
                 input.value = JSON.stringify(array);
+            
+                
+            }
+            else if (array.includes(text))  {
+                
+                array.splice(array.indexOf(text),1);
+                input.value = JSON.stringify(array);
+
             }
             
         } catch (e) {
             console.error(e);
         }
-        
+
 
 
     }
@@ -85,7 +107,7 @@ $kaarten = json_decode($kaarten);
 echo "<div id='hand'>";
 foreach ($kaarten as $kaart)
 {
-echo "<button class='card' onclick='insert($kaart)'><img src='images/".$kaart.".svg' style='height:100px;'></button>";
+echo "<button class='card' onclick='insert($kaart)'><img src='images/".$kaart.".svg' style='width:75px;'></button>";
 }
 echo "</div>";
 
@@ -119,13 +141,13 @@ function getkaartfromid($kaartid) {
 if (count($stapel) > 0) {
     $bovenstekaartid = end($stapel);
     $bovenstekaart = getkaartfromid($bovenstekaartid);
-    echo "<br>$bovenstekaartid <br><img src='images/".$bovenstekaartid.".svg' style=height:100px;> <br>";
+    echo "<br>$bovenstekaartid <br><img src='images/".$bovenstekaartid.".svg' style=width:75px;> <br>";
 
 
     $i = 2;
     while ($bovenstekaart == 1 || $bovenstekaart == 13) {
         $bovenstekaart = getkaartfromid($stapel[count($stapel) - $i]);
-        echo "<img src='images/".$stapel[count($stapel) - $i].".svg' style=height:100px;> <br>";
+        echo "<img src='images/".$stapel[count($stapel) - $i].".svg' style=width:75px;> <br>";
         $i++;
         if ($i > count($stapel)) $bovenstekaart = -1;
     }

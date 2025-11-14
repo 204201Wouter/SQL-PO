@@ -22,7 +22,7 @@ else {
         $id = rand();
         $usersWithId = $conn->query("SELECT * FROM users WHERE id = '$id'");
     }
-    $conn->query("INSERT INTO users (id, username, password, admin) VALUES ('$id', '$username', '$password', 0)");
+    $conn->query("INSERT INTO users (id, username, password) VALUES ('$id', '$username', '$password')");
     echo "account created";
 
     $_SESSION['loggedin'] = true;

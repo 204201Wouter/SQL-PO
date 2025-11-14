@@ -75,8 +75,11 @@
 <?php 
 session_start();
 
-if ($_SESSION["loggedin"]  == true)
+if ($_SESSION["loggedin"] != true)
 {
+    header("Location: inlog.php");
+    exit();
+}
 
 $conn = new mysqli("localhost", "root", "", "zweeds pesten");
 if ($conn->connect_error) {
@@ -107,7 +110,7 @@ $kaarten = json_decode($kaarten);
 echo "<div id='hand'>";
 foreach ($kaarten as $kaart)
 {
-echo "<button class='card' onclick='insert($kaart)'><img src='images/".$kaart.".svg' style='width:75px;'></button>";
+    echo "<button class='card' onclick='insert($kaart)'><img src='images/".$kaart.".svg' style='width:75px;'></button>";
 }
 echo "</div>";
 
@@ -122,7 +125,9 @@ $stapel = json_decode($stapel);
 $pakstapel = json_decode($game['pakstapel']);
 
 $turn = $game['turn'];
-$turnName = $conn->query("SELECT username FROM users WHERE id = '$turn'")->fetch_assoc()['username'];
+if ($turn >= 0) $turnName = $conn->query("SELECT username FROM users WHERE id = '$turn'")->fetch_assoc()['username'];
+else $turnName = "bot " . abs($turn);
+
 if ($turnName == $_SESSION['username'])
     echo "<br>Jij bent aan de beurt";
 else
@@ -146,17 +151,19 @@ if (count($stapel) > 0) {
 
     $i = 2;
     while ($bovenstekaart == 1 || $bovenstekaart == 13) {
+        if ($i > count($stapel)) {
+            $bovenstekaart = -1;
+            break;
+        }
         $bovenstekaart = getkaartfromid($stapel[count($stapel) - $i]);
         echo "<img src='images/".$stapel[count($stapel) - $i].".svg' style=width:75px;> <br>";
         $i++;
-        if ($i > count($stapel)) $bovenstekaart = -1;
     }
 }
 else {
     $bovenstekaartid = -1; // lege stapel dus geen kaart
     $bovenstekaart = -1;
 }
-
 
 function possibleMove(array $move)  
 {
@@ -179,18 +186,9 @@ function samecards(array $move)
 
 
 function validCard(int $move) {
-    global $kaarten;
     global $bovenstekaart;
 
-
-
     $kaart = getkaartfromid($move);
-
-    // als je kaart niet hebt
-  //  foreach ($move as $movekaart) {
-      //  if (!in_array($movekaart, $kaarten) || getkaartfromid($movekaart) != $kaart) return false;
-   // }
-   // if (!in_array($move, $kaarten)) return false;
 
     // als kaart 2, 3 of joker is
     if ($kaart == 1 || $kaart == 13 || $kaart == 0) return true;
@@ -201,9 +199,13 @@ function validCard(int $move) {
     return $kaart > $bovenstekaart;
 }
 
-function refillCards() {
-    global $kaarten;
+function refillCards(bool $forPlayer) {
     global $pakstapel;
+    if ($forPlayer) global $kaarten;
+    else {
+        global $botkaarten;
+        $kaarten = $botkaarten;
+    }
 
     for ($i = 0; $i < 13; $i++) {
         $currentCards = [$i, $i + 13, $i + 26, $i + 39];
@@ -213,10 +215,12 @@ function refillCards() {
         }
     }
 
-    while (count($kaarten) < 3)
+    while (count($kaarten) < 3 && count($pakstapel) > 0)
     {
         $kaarten[] = array_shift($pakstapel);
     }
+
+    if (!$forPlayer) $botkaarten = $kaarten;
 }
 
 function playmove(array $move) {
@@ -228,14 +232,15 @@ function playmove(array $move) {
     global $kaarten;
     global $stapel;
     global $pakstapel;
-    global $bovenstekaart;
 
     if ($game['player1'] == $playerid) $nextplayerid = $game['player2'];
+    else if ($game['player2'] == $playerid) $nextplayerid = $game['player3'];
+    else if ($game['player3'] == $playerid) $nextplayerid = $game['player4'];
     else $nextplayerid = $game['player1'];
 
 
     if ($playerid == $turn) {
-        if (validCard($move[0]) && samecards($move)){
+        if (count($move) > 0 && validCard($move[0]) && samecards($move)) {
             $conn->query("UPDATE servers SET turn = ".$nextplayerid." WHERE id = '$gameid'");
             foreach ($move as $movekaart) {
                 $stapel[] = $movekaart;
@@ -253,7 +258,7 @@ function playmove(array $move) {
                 }
             }
             
-            refillCards();
+            refillCards(true);
 
             $stapel = json_encode($stapel);
             $kaarten = json_encode($kaarten);
@@ -264,34 +269,126 @@ function playmove(array $move) {
             $conn->query("UPDATE players SET hand = '$kaarten' WHERE id = '".$_SESSION['id']."'");
             header("Refresh:0");
         }
-        else {
-            if (!possibleMove($kaarten))
+        else if (!possibleMove($kaarten))
+        {
+            $conn->query("UPDATE servers SET turn = ".$nextplayerid." WHERE id = '$gameid'");
+
+            foreach ($stapel as $kaart)
             {
-                $conn->query("UPDATE servers SET turn = ".$nextplayerid." WHERE id = '$gameid'");
-
-                foreach ($stapel as $kaart)
-                {
-                    $kaarten[] = array_shift($stapel);
-                }
-
-                refillCards();
-
-                $stapel = json_encode($stapel);
-                $kaarten = json_encode($kaarten);
-                $pakstapel = json_encode($pakstapel);
-                
-                $conn->query("UPDATE servers SET stapel = '$stapel' WHERE id = '$gameid'");
-                $conn->query("UPDATE servers SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
-                $conn->query("UPDATE players SET hand = '$kaarten' WHERE id = '".$_SESSION['id']."'");
-                header("Refresh:0");
+                $kaarten[] = array_shift($stapel);
             }
+
+            refillCards(true);
+
+            $stapel = json_encode($stapel);
+            $kaarten = json_encode($kaarten);
+            $pakstapel = json_encode($pakstapel);
+            
+            $conn->query("UPDATE servers SET stapel = '$stapel' WHERE id = '$gameid'");
+            $conn->query("UPDATE servers SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
+            $conn->query("UPDATE players SET hand = '$kaarten' WHERE id = '".$_SESSION['id']."'");
+            header("Refresh:0");
         }
     }
 }
 
 function botMove() {
-    // bot logic hier
+    global $conn;
+    global $turn;
+    global $game;
+    global $gameid;
+    global $stapel;
+    global $pakstapel;
+    global $botkaarten;
+
+    $botkaarten = json_decode($conn->query("SELECT hand FROM players WHERE id = '$turn' AND gameid = '$gameid'")->fetch_assoc()['hand']);
+
+    if ($game['player1'] == $turn) $nextplayerid = $game['player2'];
+    else if ($game['player2'] == $turn) $nextplayerid = $game['player3'];
+    else if ($game['player3'] == $turn) $nextplayerid = $game['player4'];
+    else $nextplayerid = $game['player1'];
     
+    $laagstekaart = 13;
+    $bestekaartid = -1;
+    foreach ($botkaarten as $kaart) {
+        $kaartid = getkaartfromid($kaart);
+        if (validCard($kaart) && $kaartid < $laagstekaart && $kaartid != 1 && $kaartid != 0) {
+            $laagstekaart = $kaartid;
+            $bestekaartid = $kaartid;
+        }
+    }
+
+    $move = [];
+    if ($bestekaartid != -1) {
+        foreach ($botkaarten as $kaart) {
+            if (getkaartfromid($kaart) == $bestekaartid) {
+                $move[] = $kaart;
+            }
+        }
+    }
+    else {
+        foreach ($botkaarten as $kaart) {
+            if (getkaartfromid($kaart) == 0) {
+                $move = [$kaart];
+                break;
+            }
+            if (count($move) == 0 && (getkaartfromid($kaart) == 1 || getkaartfromid($kaart) == 13)) {
+                $move = [$kaart];
+            }
+        }
+    }
+
+    if (count($move) == 0) {
+        foreach ($stapel as $kaart)
+        {
+            $botkaarten[] = array_shift($stapel);
+        }
+
+        refillCards(false);
+
+        $stapel = json_encode($stapel);
+        $botkaarten = json_encode($botkaarten);
+        $pakstapel = json_encode($pakstapel);
+        
+        $conn->query("UPDATE servers SET stapel = '$stapel' WHERE id = '$gameid'");
+        $conn->query("UPDATE servers SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
+        $conn->query("UPDATE players SET hand = '$botkaarten' WHERE id = '$turn' AND gameid = '$gameid'");
+    }
+    else {
+        foreach ($move as $movekaart) {
+            $stapel[] = $movekaart;
+            array_splice($botkaarten, array_search($movekaart, $botkaarten), 1); 
+        }
+
+        if (getkaartfromid($move[0]) == 8) {
+            $stapel = [];
+        }
+
+        for ($i = 0; $i < 13; $i++) {
+            if (in_array($i, $stapel) && in_array($i + 13, $stapel) && in_array($i + 26, $stapel) && in_array($i + 39, $stapel)) {
+                $stapel = [];
+                break;
+            }
+        }
+        
+        refillCards(false);
+
+        $stapel = json_encode($stapel);
+        $botkaarten = json_encode($botkaarten);
+        $pakstapel = json_encode($pakstapel);
+        
+        $conn->query("UPDATE servers SET stapel = '$stapel' WHERE id = '$gameid'");
+        $conn->query("UPDATE servers SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
+        $conn->query("UPDATE players SET hand = '$botkaarten' WHERE id = '$turn' AND gameid = '$gameid'");
+    }
+
+    $conn->query("UPDATE servers SET turn = ".$nextplayerid." WHERE id = '$gameid'");
+    header("Refresh:0");
+}
+
+if ($turn < 0) {
+    usleep(500000);
+    botMove();
 }
 
 if (isset($_POST['playMove'])) {
@@ -302,11 +399,5 @@ if (isset($_POST['playMove'])) {
         playmove(json_decode($value));
     }
 }
-}
-else {
-    header("Location: inlog.php");
-    exit();
-}
-
 ?>
 </body>

@@ -54,13 +54,16 @@ if ($_SESSION["loggedin"]  == true)
         $player4joined = true;
     }
     else echo "player 4: not joined";
+
+    if ($conn->query("SELECT started FROM servers WHERE id = '".$_GET["id"]."'")->fetch_assoc()['started']) {
+        header("Location: game.php?id=".$_GET["id"]);
+        exit();
+    }
 }
 else {
     header("Location: inlog.php");
     exit();
 }
-
-
 
 function startServer() {
     global $conn;
@@ -72,9 +75,20 @@ function startServer() {
     if ($_SESSION['id'] == $player1['id']) {
         $conn->query("UPDATE servers SET turn = ".$player1['id']." WHERE id = '".$_GET["id"]."'");
 
-        if (!$player2joined) $conn->query("UPDATE servers SET player2 = -1 WHERE id = '".$_GET["id"]."'");
-        if (!$player3joined) $conn->query("UPDATE servers SET player3 = -1 WHERE id = '".$_GET["id"]."'");
-        if (!$player4joined) $conn->query("UPDATE servers SET player4 = -1 WHERE id = '".$_GET["id"]."'");
+        if (!$player2joined) {
+            $conn->query("UPDATE servers SET player2 = -1 WHERE id = '".$_GET["id"]."'");
+            $conn->query("UPDATE players SET id = -1 WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1");
+        }
+        if (!$player3joined) {
+            $conn->query("UPDATE servers SET player3 = -2 WHERE id = '".$_GET["id"]."'");
+            $conn->query("UPDATE players SET id = -2 WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1");
+        }
+        if (!$player4joined) {
+            $conn->query("UPDATE servers SET player4 = -3 WHERE id = '".$_GET["id"]."'");
+            $conn->query("UPDATE players SET id = -3 WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1");
+        }
+
+        $conn->query("UPDATE servers SET started = 1 WHERE id = '".$_GET["id"]."'");
 
         header("Location: game.php?id=".$_GET["id"]);
         exit();

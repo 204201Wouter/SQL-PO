@@ -16,7 +16,7 @@ if ($_SESSION["loggedin"]  == true)
 
 
 
-    $sql = "SELECT * FROM servers WHERE id = "."'".$_SESSION['username']."'";
+    $sql = "SELECT * FROM servers WHERE id = '".$_SESSION['username']."'";
     $result = $conn->query($sql);
     if ($result->num_rows == 0) {
 

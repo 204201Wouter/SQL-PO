@@ -15,6 +15,8 @@ function test() {
     global $conn;
     $conn->query("DELETE FROM servers");
     $conn->query("DELETE FROM players");
+    header("Location: home.php");
+    exit();
 }
 
 if (isset($_POST['runFunction'])) {

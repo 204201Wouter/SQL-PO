@@ -31,11 +31,14 @@ if ($_SESSION["loggedin"]  == true)
     }
         
 
-    $sql = "UPDATE players SET id =". $_SESSION['id']." WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1";
-
+    //$sql = "UPDATE players SET id =". $_SESSION['id']." WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1";
+    $sql = "INSERT INTO players (id, user,serverid)
+    VALUES ('".$_SESSION['id']."', '".$_SESSION['id']."','".$_GET['id']."'   )";
     $result = $conn->query($sql);
-    
+    header("Location: lobby.php?id=".$_GET['id']);
+    exit();
 
+    /*
     $player1 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player1 FROM servers WHERE id = '".$_GET["id"]."')")->fetch_assoc();
     if ($player1 == null) {
 
@@ -61,8 +64,8 @@ if ($_SESSION["loggedin"]  == true)
             exit();
 
         }
-        
-    }
+    
+    }*/
 
 
 

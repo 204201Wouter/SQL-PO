@@ -23,6 +23,19 @@ if ($_SESSION["loggedin"]  == true)
     $player3joined = false;
     $player4joined = false;
 
+
+    $sql = "SELECT Users.username FROM players JOIN users ON players.user = users.id WHERE serverid = '".$_GET["id"]."'";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+  
+            echo $row['username']."<br> ";
+            ;
+        }
+    }
+        
+
+    /*
     echo "waiting for more players<br>";
     $player1 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player1 FROM servers WHERE id = '".$_GET["id"]."')")->fetch_assoc();
     if ($player1 <> null) {
@@ -55,6 +68,8 @@ if ($_SESSION["loggedin"]  == true)
     }
     else echo "player 4: not joined";
 
+    */
+
     if ($conn->query("SELECT started FROM servers WHERE id = '".$_GET["id"]."'")->fetch_assoc()['started']) {
         header("Location: game.php?id=".$_GET["id"]);
         exit();
@@ -72,9 +87,86 @@ function startServer() {
     global $player3joined;
     global $player4joined;
 
-    if ($_SESSION['id'] == $player1['id']) {
-        $conn->query("UPDATE servers SET turn = ".$player1['id']." WHERE id = '".$_GET["id"]."'");
+    if ($_SESSION['username'] == $_GET['id']) {
+      //  $conn->query("UPDATE servers SET turn = ".$_SESSION['username'] ." WHERE id = '".$_SESSION['username'] ."'");
 
+        $hands = [[],[],[],[]];
+        $cards = [];
+        for ($i = 0; $i<54;$i++)
+        {
+            $cards[] = $i;
+        }
+
+        shuffle($cards);
+
+        for ($i = 0; $i < 3; $i++) {
+            $hands[0][] = array_shift($cards);
+            $hands[1][] = array_shift($cards);
+            $hands[2][]  = array_shift($cards);
+            $hands[3][]  = array_shift($cards);
+        }
+        
+
+
+
+        $stmt = $conn->prepare("UPDATE players SET hand = ? WHERE id = ?");
+        //$conn->query("UPDATE players SET hand = '".json_encode($player1hand)."' WHERE gameid = '".$_GET['id']."' LIMIT 1");
+        
+        
+        $sql = "SELECT * FROM players WHERE serverid = '".$_GET["id"]."'";
+        $result = $conn->query($sql);
+
+        
+
+        $i = 0;
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+
+               
+    
+                $stmt->bind_param('si', json_encode($hands[$i]), $row['id']);
+                $stmt->execute();
+   
+                
+                $i++;
+            }
+        }
+
+        $sql = "SELECT * FROM players WHERE serverid = '".$_GET["id"]."' ORDER BY RAND() LIMIT 1";
+        $turn = $conn->query($sql)->fetch_assoc()["id"];
+
+     
+
+        $sql = "INSERT INTO games (id, turn, stapel, pakstapel)
+        VALUES ('".$_GET['id']."',".$turn.",'[]','".json_encode($cards)."')";
+        $result = $conn->query($sql);
+
+
+        
+
+        $sql = "UPDATE servers SET gameid = ? WHERE id = '".$_GET["id"]."'";
+        $result = $conn->query($sql);
+
+
+
+
+        /*
+        $sql = "INSERT INTO players (hand, gameid)
+        VALUES ('".json_encode($player1hand)."','".$_SESSION['username']."')";
+        $result = $conn->query($sql);
+        $sql = "INSERT INTO players (hand, gameid)
+        VALUES ('".json_encode($player2hand)."','".$_SESSION['username']."')";
+        $result = $conn->query($sql);
+        $sql = "INSERT INTO players (hand, gameid)
+        VALUES ('".json_encode($player3hand)."','".$_SESSION['username']."')";
+        $result = $conn->query($sql);
+        $sql = "INSERT INTO players (hand, gameid)
+        VALUES ('".json_encode($player4hand)."','".$_SESSION['username']."')";
+        $result = $conn->query($sql);*/
+        
+
+
+        /*
         if (!$player2joined) {
             $conn->query("UPDATE servers SET player2 = -1 WHERE id = '".$_GET["id"]."'");
             $conn->query("UPDATE players SET id = -1 WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1");
@@ -87,8 +179,9 @@ function startServer() {
             $conn->query("UPDATE servers SET player4 = -3 WHERE id = '".$_GET["id"]."'");
             $conn->query("UPDATE players SET id = -3 WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1");
         }
+        */
 
-        $conn->query("UPDATE servers SET started = 1 WHERE id = '".$_GET["id"]."'");
+      //  $conn->query("UPDATE servers SET started = 1 WHERE id = '".$_GET["id"]."'");
 
         header("Location: game.php?id=".$_GET["id"]);
         exit();

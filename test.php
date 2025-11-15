@@ -13,8 +13,10 @@ if ($conn->connect_error) {
 
 function test() {
     global $conn;
-    $conn->query("DELETE FROM servers");
+
     $conn->query("DELETE FROM players");
+    $conn->query("DELETE FROM servers");
+    $conn->query("DELETE FROM games");
     header("Location: home.php");
     exit();
 }

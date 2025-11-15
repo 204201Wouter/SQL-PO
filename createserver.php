@@ -20,7 +20,7 @@ if ($_SESSION["loggedin"]  == true)
     $result = $conn->query($sql);
     if ($result->num_rows == 0) {
 
-
+        /*
         $cards = [];
         for ($i = 0; $i<54;$i++)
         {
@@ -35,15 +35,15 @@ if ($_SESSION["loggedin"]  == true)
             $player3hand[] = array_shift($cards);
             $player4hand[] = array_shift($cards);
         }
+        */
 
 
-
-        $sql = "INSERT INTO servers (id, stapel, pakstapel)
-        VALUES ('".$_SESSION['username']."', '".json_encode([])."', '".json_encode($cards)."')";
+        $sql = "INSERT INTO servers (id, started)
+        VALUES ('".$_SESSION['username']."', 0)";
         $result = $conn->query($sql);
 
         
-
+        /*
         $sql = "INSERT INTO players (hand, gameid)
         VALUES ('".json_encode($player1hand)."','".$_SESSION['username']."')";
         $result = $conn->query($sql);
@@ -56,6 +56,7 @@ if ($_SESSION["loggedin"]  == true)
         $sql = "INSERT INTO players (hand, gameid)
         VALUES ('".json_encode($player4hand)."','".$_SESSION['username']."')";
         $result = $conn->query($sql);
+        */
 
 
         header("Location: joinserver.php?id=".$_SESSION['username']);

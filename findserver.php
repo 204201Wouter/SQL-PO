@@ -19,19 +19,19 @@ if ($_SESSION["loggedin"]  == true)
     }
 
     // leave currents servers user
-
+    /*
      $sql = "DELETE FROM players WHERE gameid=(SELECT id FROM servers WHERE player1='".$_SESSION['id']."' OR player2='".$_SESSION['id']."')";
        $result = $conn->query($sql);
   
      $sql = "DELETE FROM servers WHERE player1='".$_SESSION['id']."' OR player2='".$_SESSION['id']."'";
        $result = $conn->query($sql);
 
-
+    */
     
 
 
 
-    $sql = "SELECT * FROM servers WHERE player1=0 OR player2=0";
+    $sql = "SELECT * FROM servers WHERE started = 0";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {

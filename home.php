@@ -20,6 +20,18 @@ if ($_SESSION["loggedin"] == true)
     echo "welkom". $_SESSION['username']."<a href='createserver.php'>create server</a><br><a href='findserver.php'>join server</a>";
 
     $conn->close();
+
+    echo '
+    <form method="post">
+        <input type="submit" name="logout"
+                 value="logout">
+        
+
+    </form>';
+
+    if(array_key_exists('logout', $_POST)) {
+        session_destroy(); 
+    }
 }
 else {
     header("Location: inlog.php");

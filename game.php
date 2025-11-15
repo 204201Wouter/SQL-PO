@@ -91,7 +91,7 @@ if ($conn->connect_error) {
 $gameid = $_GET['id'];
 $playerid = $_SESSION['id'];
 
-$game = $conn->query("SELECT * FROM servers WHERE id = '$gameid'");
+$game = $conn->query("SELECT * FROM games WHERE id = '$gameid'");
 
 if ($game->num_rows == 0) 
 {
@@ -128,7 +128,8 @@ $turn = $game['turn'];
 if ($turn >= 0) $turnName = $conn->query("SELECT username FROM users WHERE id = '$turn'")->fetch_assoc()['username'];
 else $turnName = "bot " . abs($turn);
 
-if ($turnName == $_SESSION['username'])
+
+if (strcasecmp($turnName, $_SESSION['username']) == 0)
     echo "<br>Jij bent aan de beurt";
 else
 echo "<br>$turnName is aan de beurt<meta http-equiv='refresh' content='2'>";
@@ -233,15 +234,46 @@ function playmove(array $move) {
     global $stapel;
     global $pakstapel;
 
+    
+    $sql = "SELECT * FROM players WHERE serverid = '$gameid'";
+    $result = $conn->query($sql);
+
+    while ($row = $result->fetch_assoc()) {
+        if ($row['id'] == $playerid) {
+            break;
+        }
+    }
+
+
+    $nextplayerid = $result->fetch_assoc();
+
+
+    if (!$nextplayerid) {
+    $result->data_seek(0);
+    $nextplayerid = $result->fetch_assoc();
+    }
+
+    $nextplayerid = $nextplayerid["id"];
+
+    echo $nextplayerid;
+
+    echo "ee";
+
+ 
+
+
+  //  mysqli_data_seek($result,0);
+
+    /*
     if ($game['player1'] == $playerid) $nextplayerid = $game['player2'];
     else if ($game['player2'] == $playerid) $nextplayerid = $game['player3'];
     else if ($game['player3'] == $playerid) $nextplayerid = $game['player4'];
-    else $nextplayerid = $game['player1'];
+    else $nextplayerid = $game['player1'];*/
 
 
     if ($playerid == $turn) {
         if (count($move) > 0 && validCard($move[0]) && samecards($move)) {
-            $conn->query("UPDATE servers SET turn = ".$nextplayerid." WHERE id = '$gameid'");
+            $conn->query("UPDATE games SET turn = ".$nextplayerid." WHERE id = '$gameid'");
             foreach ($move as $movekaart) {
                 $stapel[] = $movekaart;
                 array_splice($kaarten, array_search($movekaart, $kaarten), 1); 
@@ -264,14 +296,14 @@ function playmove(array $move) {
             $kaarten = json_encode($kaarten);
             $pakstapel = json_encode($pakstapel);
             
-            $conn->query("UPDATE servers SET stapel = '$stapel' WHERE id = '$gameid'");
-            $conn->query("UPDATE servers SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
+            $conn->query("UPDATE games SET stapel = '$stapel' WHERE id = '$gameid'");
+            $conn->query("UPDATE games SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
             $conn->query("UPDATE players SET hand = '$kaarten' WHERE id = '".$_SESSION['id']."'");
             header("Refresh:0");
         }
         else if (!possibleMove($kaarten))
         {
-            $conn->query("UPDATE servers SET turn = ".$nextplayerid." WHERE id = '$gameid'");
+            $conn->query("UPDATE games SET turn = ".$nextplayerid." WHERE id = '$gameid'");
 
             foreach ($stapel as $kaart)
             {
@@ -284,12 +316,13 @@ function playmove(array $move) {
             $kaarten = json_encode($kaarten);
             $pakstapel = json_encode($pakstapel);
             
-            $conn->query("UPDATE servers SET stapel = '$stapel' WHERE id = '$gameid'");
-            $conn->query("UPDATE servers SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
+            $conn->query("UPDATE games SET stapel = '$stapel' WHERE id = '$gameid'");
+            $conn->query("UPDATE games SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
             $conn->query("UPDATE players SET hand = '$kaarten' WHERE id = '".$_SESSION['id']."'");
             header("Refresh:0");
         }
     }
+        
 }
 
 function botMove() {
@@ -303,10 +336,16 @@ function botMove() {
 
     $botkaarten = json_decode($conn->query("SELECT hand FROM players WHERE id = '$turn' AND gameid = '$gameid'")->fetch_assoc()['hand']);
 
-    if ($game['player1'] == $turn) $nextplayerid = $game['player2'];
-    else if ($game['player2'] == $turn) $nextplayerid = $game['player3'];
-    else if ($game['player3'] == $turn) $nextplayerid = $game['player4'];
-    else $nextplayerid = $game['player1'];
+    $sql = "SELECT * FROM players WHERE serverid = '$gameid'";
+    $result = $conn->query($sql);
+
+    while ($row = $result->fetch_assoc()) {
+        if ($row['id'] = $playerid) {
+            break;
+        }
+    }
+
+    $nextplayerid = $result->fetch_assoc()["id"];
     
     $laagstekaart = 13;
     $bestekaartid = -1;
@@ -350,8 +389,8 @@ function botMove() {
         $botkaarten = json_encode($botkaarten);
         $pakstapel = json_encode($pakstapel);
         
-        $conn->query("UPDATE servers SET stapel = '$stapel' WHERE id = '$gameid'");
-        $conn->query("UPDATE servers SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
+        $conn->query("UPDATE games SET stapel = '$stapel' WHERE id = '$gameid'");
+        $conn->query("UPDATE games SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
         $conn->query("UPDATE players SET hand = '$botkaarten' WHERE id = '$turn' AND gameid = '$gameid'");
     }
     else {
@@ -377,12 +416,12 @@ function botMove() {
         $botkaarten = json_encode($botkaarten);
         $pakstapel = json_encode($pakstapel);
         
-        $conn->query("UPDATE servers SET stapel = '$stapel' WHERE id = '$gameid'");
-        $conn->query("UPDATE servers SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
+        $conn->query("UPDATE games SET stapel = '$stapel' WHERE id = '$gameid'");
+        $conn->query("UPDATE games SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
         $conn->query("UPDATE players SET hand = '$botkaarten' WHERE id = '$turn' AND gameid = '$gameid'");
     }
 
-    $conn->query("UPDATE servers SET turn = ".$nextplayerid." WHERE id = '$gameid'");
+    $conn->query("UPDATE games SET turn = ".$nextplayerid." WHERE id = '$gameid'");
     header("Refresh:0");
 }
 

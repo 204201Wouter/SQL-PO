@@ -6,10 +6,7 @@ CREATE TABLE `Users` (
 
 CREATE TABLE `Servers` (
   `id` VARCHAR(36) PRIMARY KEY,
-  `player1` integer,
-  `player2` integer,
-  `player3` integer,
-  `player4` integer,
+  `gameid` VARCHAR(36),
   `started` tinyint
 );
 
@@ -22,22 +19,15 @@ CREATE TABLE `Games` (
 
 CREATE TABLE `Players` (
   `id` integer PRIMARY KEY,
+  `user` integer,
   `hand` text,
   `kaartenvooropen` text,
-  `kaarenvoorgesloten` text,
-  `gameid` VARCHAR(36)
+  `kaartenvoorgesloten` text,
+  `serverid` VARCHAR(36)
 );
 
-ALTER TABLE `Servers` ADD FOREIGN KEY (`player1`) REFERENCES `Users` (`id`);
+ALTER TABLE `Servers` ADD FOREIGN KEY (`gameid`) REFERENCES `Games` (`id`);
 
-ALTER TABLE `Servers` ADD FOREIGN KEY (`player2`) REFERENCES `Users` (`id`);
+ALTER TABLE `Players` ADD FOREIGN KEY (`user`) REFERENCES `Users` (`id`);
 
-ALTER TABLE `Servers` ADD FOREIGN KEY (`player3`) REFERENCES `Users` (`id`);
-
-ALTER TABLE `Servers` ADD FOREIGN KEY (`player4`) REFERENCES `Users` (`id`);
-
-ALTER TABLE `Games` ADD FOREIGN KEY (`id`) REFERENCES `Servers` (`id`);
-
-ALTER TABLE `Players` ADD FOREIGN KEY (`gameid`) REFERENCES `Games` (`id`);
-
-ALTER TABLE `Games` ADD FOREIGN KEY (`turn`) REFERENCES `Players` (`id`);
+ALTER TABLE `Players` ADD FOREIGN KEY (`serverid`) REFERENCES `Servers` (`id`);

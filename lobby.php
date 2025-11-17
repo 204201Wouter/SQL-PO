@@ -119,21 +119,29 @@ function startServer() {
         
 
         $i = 0;
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-
-               
-    
-                $stmt->bind_param('si', json_encode($hands[$i]), $row['id']);
-                $stmt->execute();
-   
-                
-                $i++;
-            }
+        for ($i2 = $result->num_rows; $i2 < 4; $i2++) {
+            $i3 = -$i2;
+    $sql = $conn->query("INSERT INTO players (id,serverid, nummer)
+    VALUES ($i3,'".$_GET['id']."'  , $i2 )");
+ 
         }
 
-        $sql = "SELECT * FROM players WHERE serverid = '".$_GET["id"]."' ORDER BY RAND() LIMIT 1";
-        $turn = $conn->query($sql)->fetch_assoc()["id"];
+
+    
+        while ($row = $result->fetch_assoc()) {
+
+            
+
+            $stmt->bind_param('si', json_encode($hands[$i]), $row['id']);
+            $stmt->execute();
+
+            
+            $i++;
+        }
+    
+
+      //  $sql = "SELECT * FROM players WHERE serverid = '".$_GET["id"]."' ORDER BY RAND() LIMIT 1";
+        $turn = 0;
 
      
 
@@ -144,11 +152,7 @@ function startServer() {
 
         
 
-        $sql = "UPDATE servers SET gameid = ? WHERE id = '".$_GET["id"]."'";
-        $result = $conn->query($sql);
-
-
-
+ 
 
         /*
         $sql = "INSERT INTO players (hand, gameid)
@@ -181,7 +185,7 @@ function startServer() {
         }
         */
 
-      //  $conn->query("UPDATE servers SET started = 1 WHERE id = '".$_GET["id"]."'");
+        $conn->query("UPDATE servers SET started = 1 WHERE id = '".$_GET["id"]."'");
 
         header("Location: game.php?id=".$_GET["id"]);
         exit();

@@ -23,7 +23,8 @@ CREATE TABLE `Players` (
   `hand` text,
   `kaartenvooropen` text,
   `kaartenvoorgesloten` text,
-  `serverid` VARCHAR(36)
+  `serverid` VARCHAR(36),
+  `nummer` integer
 );
 
 ALTER TABLE `Servers` ADD FOREIGN KEY (`gameid`) REFERENCES `Games` (`id`);

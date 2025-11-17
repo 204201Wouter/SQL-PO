@@ -29,11 +29,14 @@ if ($_SESSION["loggedin"]  == true)
         header("Location: home.php");
         exit();
     }
-        
+    
+    $sql = "SELECT COUNT(*) FROM players WHERE serverid = '$gameid'";
+    $playersjoined = $conn->query($sql)->fetch_assoc()["COUNT(*)"];
+  //  print_r($playersjoined["COUNT(*)"]);//$playersjoined["num_rows"]);
 
     //$sql = "UPDATE players SET id =". $_SESSION['id']." WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1";
-    $sql = "INSERT INTO players (id, user,serverid)
-    VALUES ('".$_SESSION['id']."', '".$_SESSION['id']."','".$_GET['id']."'   )";
+    $sql = "INSERT INTO players (id, user,serverid, nummer)
+    VALUES ('".$_SESSION['id']."', '".$_SESSION['id']."','$gameid'  , $playersjoined )";
     $result = $conn->query($sql);
     header("Location: lobby.php?id=".$_GET['id']);
     exit();

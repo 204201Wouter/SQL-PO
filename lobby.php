@@ -121,12 +121,16 @@ function startServer() {
         $i = 0;
         for ($i2 = $result->num_rows; $i2 < 4; $i2++) {
             $i3 = -$i2;
-    $sql = $conn->query("INSERT INTO players (id,serverid, nummer)
-    VALUES ($i3,'".$_GET['id']."'  , $i2 )");
+    $sql = $conn->query("INSERT INTO players (id, user ,serverid, nummer)
+    VALUES ($i3,   1234567   ,'".$_GET['id']."'  , $i2 )");
  
         }
 
 
+        $sql = "SELECT * FROM players WHERE serverid = '".$_GET["id"]."'";
+        $result = $conn->query($sql);
+
+        
     
         while ($row = $result->fetch_assoc()) {
 

@@ -32,3 +32,5 @@ ALTER TABLE `Servers` ADD FOREIGN KEY (`gameid`) REFERENCES `Games` (`id`);
 ALTER TABLE `Players` ADD FOREIGN KEY (`user`) REFERENCES `Users` (`id`);
 
 ALTER TABLE `Players` ADD FOREIGN KEY (`serverid`) REFERENCES `Servers` (`id`);
+
+INSERT INTO Users (id, username) VALUES (-1, 'bot');

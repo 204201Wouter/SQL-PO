@@ -382,7 +382,7 @@ function botMove() {
         
         $conn->query("UPDATE games SET stapel = '$stapel' WHERE id = '$gameid'");
         $conn->query("UPDATE games SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
-        $conn->query("UPDATE players SET hand = '$botkaarten' WHERE id = '$turn' AND serverid = '$gameid'");
+        $conn->query("UPDATE players SET hand = '$botkaarten' WHERE nummer = '$turn' AND serverid = '$gameid'");
     }
     else {
         foreach ($move as $movekaart) {
@@ -409,7 +409,7 @@ function botMove() {
         
         $conn->query("UPDATE games SET stapel = '$stapel' WHERE id = '$gameid'");
         $conn->query("UPDATE games SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
-        $conn->query("UPDATE players SET hand = '$botkaarten' WHERE id = '$turn' AND serverid = '$gameid'");
+        $conn->query("UPDATE players SET hand = '$botkaarten' WHERE nummer = '$turn' AND serverid = '$gameid'");
     }
 
     $conn->query("UPDATE games SET turn = ".$nextplayer." WHERE id = '$gameid'");
@@ -417,7 +417,7 @@ function botMove() {
 }
 
 
-$result = $conn->query("SELECT * FROM players WHERE serverid = '$gameid' AND user = 1234567");
+$result = $conn->query("SELECT * FROM players WHERE serverid = '$gameid' AND user = -1");
 $lowestbotnumber = 3;
 if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
@@ -435,7 +435,7 @@ if ($result->num_rows > 0) {
 
 
 if ($turn >= $lowestbotnumber) {
-    usleep(500000);
+    usleep(1000000);
     botMove();
 }
 

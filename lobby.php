@@ -121,9 +121,8 @@ function startServer() {
         $i = 0;
         for ($i2 = $result->num_rows; $i2 < 4; $i2++) {
             $i3 = -$i2;
-    $sql = $conn->query("INSERT INTO players (id, user ,serverid, nummer)
-    VALUES ($i3,   1234567   ,'".$_GET['id']."'  , $i2 )");
- 
+            $sql = $conn->query("INSERT INTO players (id, user, serverid, nummer)
+            VALUES ($i3, -1, '".$_GET['id']."', $i2 )");
         }
 
 
@@ -133,61 +132,19 @@ function startServer() {
         
     
         while ($row = $result->fetch_assoc()) {
-
-            
-
             $stmt->bind_param('si', json_encode($hands[$i]), $row['id']);
             $stmt->execute();
 
-            
             $i++;
         }
     
 
-      //  $sql = "SELECT * FROM players WHERE serverid = '".$_GET["id"]."' ORDER BY RAND() LIMIT 1";
         $turn = 0;
 
-     
 
         $sql = "INSERT INTO games (id, turn, stapel, pakstapel)
         VALUES ('".$_GET['id']."',".$turn.",'[]','".json_encode($cards)."')";
         $result = $conn->query($sql);
-
-
-        
-
- 
-
-        /*
-        $sql = "INSERT INTO players (hand, gameid)
-        VALUES ('".json_encode($player1hand)."','".$_SESSION['username']."')";
-        $result = $conn->query($sql);
-        $sql = "INSERT INTO players (hand, gameid)
-        VALUES ('".json_encode($player2hand)."','".$_SESSION['username']."')";
-        $result = $conn->query($sql);
-        $sql = "INSERT INTO players (hand, gameid)
-        VALUES ('".json_encode($player3hand)."','".$_SESSION['username']."')";
-        $result = $conn->query($sql);
-        $sql = "INSERT INTO players (hand, gameid)
-        VALUES ('".json_encode($player4hand)."','".$_SESSION['username']."')";
-        $result = $conn->query($sql);*/
-        
-
-
-        /*
-        if (!$player2joined) {
-            $conn->query("UPDATE servers SET player2 = -1 WHERE id = '".$_GET["id"]."'");
-            $conn->query("UPDATE players SET id = -1 WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1");
-        }
-        if (!$player3joined) {
-            $conn->query("UPDATE servers SET player3 = -2 WHERE id = '".$_GET["id"]."'");
-            $conn->query("UPDATE players SET id = -2 WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1");
-        }
-        if (!$player4joined) {
-            $conn->query("UPDATE servers SET player4 = -3 WHERE id = '".$_GET["id"]."'");
-            $conn->query("UPDATE players SET id = -3 WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1");
-        }
-        */
 
         $conn->query("UPDATE servers SET started = 1 WHERE id = '".$_GET["id"]."'");
 

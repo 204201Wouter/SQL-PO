@@ -140,10 +140,14 @@ $playernumber = $result['nummer'];
 //else $turnName = "bot " . abs($turn);
 
 
-if (strcasecmp($turnName, $_SESSION['username']) == 0)
-    echo "<br>Jij bent aan de beurt";
-else
-echo "<br>$turnName is aan de beurt<meta http-equiv='refresh' content='2'>";
+if ($game['winner'] == null) {
+    if (strcasecmp($turnName, $_SESSION['username']) == 0) echo "<br>Jij bent aan de beurt";
+    else echo "<br>$turnName is aan de beurt<meta http-equiv='refresh' content='2'>";
+}
+else {
+    if (strcasecmp($turnName, $_SESSION['username']) == 0) echo "Jij hebt gewonnen";
+    else echo "$turnName heeft gewonnen";
+}
 
 // ------ IDs KAARTEN -------
 // 0-12: HARTEN, 13-25: RUITEN, 26-38: SCHOPPEN, 39-51: KLAVERS
@@ -269,7 +273,6 @@ function playmove(array $move) {
 
     if ($playernumber == $turn) {
         if (count($move) > 0 && validCard($move[0]) && samecards($move)) {
-            $conn->query("UPDATE games SET turn = ".$nextplayer." WHERE id = '$gameid'");
             foreach ($move as $movekaart) {
                 $stapel[] = $movekaart;
                 array_splice($kaarten, array_search($movekaart, $kaarten), 1); 
@@ -288,6 +291,11 @@ function playmove(array $move) {
             
             refillCards(true);
 
+            if (count($kaarten) == 0) {
+                $conn->query("UPDATE games SET winner = $turn WHERE id = '$gameid'");
+            }
+            else $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");
+
             $stapel = json_encode($stapel);
             $kaarten = json_encode($kaarten);
             $pakstapel = json_encode($pakstapel);
@@ -299,7 +307,7 @@ function playmove(array $move) {
         }
         else if (!possibleMove($kaarten))
         {
-            $conn->query("UPDATE games SET turn = ".$nextplayer." WHERE id = '$gameid'");
+            $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");
 
             foreach ($stapel as $kaart)
             {
@@ -383,6 +391,8 @@ function botMove() {
         $conn->query("UPDATE games SET stapel = '$stapel' WHERE id = '$gameid'");
         $conn->query("UPDATE games SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
         $conn->query("UPDATE players SET hand = '$botkaarten' WHERE nummer = '$turn' AND serverid = '$gameid'");
+        
+        $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");
     }
     else {
         foreach ($move as $movekaart) {
@@ -403,6 +413,9 @@ function botMove() {
         
         refillCards(false);
 
+        if (count($botkaarten) == 0) $conn->query("UPDATE games SET winner = $turn WHERE id = '$gameid'");
+        else $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");
+
         $stapel = json_encode($stapel);
         $botkaarten = json_encode($botkaarten);
         $pakstapel = json_encode($pakstapel);
@@ -412,7 +425,6 @@ function botMove() {
         $conn->query("UPDATE players SET hand = '$botkaarten' WHERE nummer = '$turn' AND serverid = '$gameid'");
     }
 
-    $conn->query("UPDATE games SET turn = ".$nextplayer." WHERE id = '$gameid'");
     header("Refresh:0");
 }
 
@@ -420,32 +432,21 @@ function botMove() {
 $result = $conn->query("SELECT * FROM players WHERE serverid = '$gameid' AND user = -1");
 $lowestbotnumber = 3;
 if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-
-            if ($row["nummer"] < $lowestbotnumber)
-            $lowestbotnumber = $row["nummer"];
-            
- 
-
+    while ($row = $result->fetch_assoc()) {
+        if ($row["nummer"] < $lowestbotnumber)
+        $lowestbotnumber = $row["nummer"];
     }
 }
     
 
-
-
-
-if ($turn >= $lowestbotnumber) {
+if ($turn >= $lowestbotnumber && $game['winner'] == null) {
     usleep(1000000);
     botMove();
 }
 
-if (isset($_POST['playMove'])) {
+if (isset($_POST['playMove']) && $game['winner'] == null) {
     $value = $_POST['move'];
-    $array = json_decode($value);
-    if (is_array($array) || true)
-    {
-        playmove(json_decode($value));
-    }
+    playmove(json_decode($value));
 }
 ?>
 </body>

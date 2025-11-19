@@ -92,7 +92,7 @@ function startServer() {
 
         $hands = [[],[],[],[]];
         $cards = [];
-        for ($i = 0; $i<54;$i++)
+        for ($i = 0; $i<20;$i++)
         {
             $cards[] = $i;
         }

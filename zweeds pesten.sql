@@ -14,7 +14,8 @@ CREATE TABLE `Games` (
   `id` VARCHAR(36) PRIMARY KEY,
   `turn` integer,
   `stapel` text,
-  `pakstapel` text
+  `pakstapel` text,
+  `winner` integer
 );
 
 CREATE TABLE `Players` (

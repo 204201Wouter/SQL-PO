@@ -6,53 +6,72 @@
         
             border: none;
             margin: 5px;
+
+   
          
 
         }
-        .card:active {
-        transform: translateY(4px);
-        }
+
         #hand {
           
             position: fixed;
-            left: calc(50% - 125px);
-            bottom: 10;
+            left: 50%;
+            bottom: 10px;
 
         }
         #stapel {
             position: fixed;
-            left: calc(50% - 125px);
-            top: calc(50% - 125px);; 
+            left: 50%;
+            top: 50%; 
+            transform: translate(-50%,-50%);
+         
         }
+
     </style>
 </head>
 
 <body style="background-color:#008531;">
 <form method="post">
-  <input type="text" name="move" placeholder="move" id="input" value="[]">
-  <button type="submit" name="playMove">Play Move</button>
+  <input type="text" name="move" placeholder="move" id="input" value="[]" style="display:None;'">
+  <button type="submit" name="playMove" style='position:fixed;left:50%;bottom:10;transform:translateX(-50%);'>Play Move</button>
 </form>
 
 <script>
+
+    function moveto(object, start,end)
+    {
+        object.style.transform = "translate(-50%,-50%)";
+        object.style.top = "50%";
+       // object.style.transform += ` translate(${end[0]-start[0]}px, ${end[1]-start[1]}px)`;
+        console.log(object.style.left );
+
+    }
     function insert(text)
     {
         const input = document.getElementById('input');
         const card = document.getElementById(text);
 
+        console.log(card);
+        console.log("e");
         function getkaartfromid(kaartid) {
             if (kaartid > 51) return 13;
             else return kaartid % 13;
         }
+
+
+        
+
      
         try {
             let array = JSON.parse(input.value);
-            console.log(array);
+           // console.log(array);
 
             
             if (!array.includes(text) && (array.length == 0 || (array.length > 0 && getkaartfromid(array[0]) == getkaartfromid(text) ) )) {
                 array.push(text);
-                console.log(array);
+               // console.log(array);
                 input.value = JSON.stringify(array);
+                card.style.transform += "translateY(-10px)";
             
                 
             }
@@ -60,12 +79,15 @@
                 
                 array.splice(array.indexOf(text),1);
                 input.value = JSON.stringify(array);
+                card.style.transform += "translateY(10px)";
 
             }
             
         } catch (e) {
             console.error(e);
         }
+
+      //  moveto(card,[0,0],[0,-50])
 
 
 
@@ -105,25 +127,153 @@ $game = $game->fetch_assoc();
 
 $kaarten = $conn->query("SELECT hand FROM players WHERE id = '".$_SESSION['id']."'")->fetch_assoc()['hand'];
 
-echo "jouw kaarten: <br>".$kaarten."<br>";
+//echo "jouw kaarten: <br>".$kaarten."<br>";
 $kaarten = json_decode($kaarten);
 
 echo "<div id='hand'>";
+$i = 1;
 foreach ($kaarten as $kaart)
 {
-    echo "<button class='card' onclick='insert($kaart)'><img src='images/".$kaart.".svg' style='width:75px;'></button>";
+    if ($i % 2 == 0)
+    {
+        $b = -1;
+    }
+    else {$b = 1;}
+
+    $a = floor(($i)/2) * 80 * $b;
+    echo "<button class='card' onclick='insert($kaart)'><img id='$kaart' src='images/".$kaart.".svg' 
+    style='width:75px; 
+    position:fixed;
+    bottom:50px;
+    left:50%;
+    transform:translateX(".$a."px) translateX(-50%);
+    '></button>";
+    $i++;
 }
+
+
+/*
+
+$sql = "SELECT hand FROM players WHERE serverid = '$gameid'";
+$result = $conn->query($sql);
+$i = 1;
+$row = $result->fetch_assoc();
+$enemykaarten = json_decode($row['hand']);
+if ($enemykaarten == $kaarten)
+{
+    $row = $result->fetch_assoc();
+    $enemykaarten = json_decode($row['hand']);  
+}
+print_r( $enemykaarten);
+
+foreach ($enemykaarten as $kaart)
+{
+    if ($i % 2 == 0)
+    {
+        $b = -1;
+    }
+    else {$b = 1;}
+
+    $a = floor(($i)/2) * 80 * $b;
+    echo "<img src='images/back.svg' 
+    style='width:75px; 
+    position:fixed;
+    top:10px;
+    left:50%;
+    transform:translateX(".$a."px) translateX(-50%);
+    '>";
+    $i++;
+}
+
+
+$i = 1;
+$row = $result->fetch_assoc();
+$enemykaarten = json_decode($row['hand']);
+if ($enemykaarten == $kaarten)
+{
+    $row = $result->fetch_assoc();
+    $enemykaarten = json_decode($row['hand']);  
+}
+print_r( $enemykaarten);
+
+foreach ($enemykaarten as $kaart)
+{
+    if ($i % 2 == 0)
+    {
+        $b = -1;
+    }
+    else {$b = 1;}
+
+    $a = floor(($i)/2) * 80 * $b;
+    echo "<img src='images/back.svg' 
+    style='width:75px; 
+    position:fixed;
+    top:100px;
+    left:50%;
+    transform:translateX(".$a."px) translateX(-50%);
+    '>";
+    $i++;
+}
+
+
+$i = 1;
+$row = $result->fetch_assoc();
+$enemykaarten = json_decode($row['hand']);
+if ($enemykaarten == $kaarten)
+{
+    $row = $result->fetch_assoc();
+    $enemykaarten = json_decode($row['hand']);  
+}
+print_r( $enemykaarten);
+
+foreach ($enemykaarten as $kaart)
+{
+    if ($i % 2 == 0)
+    {
+        $b = -1;
+    }
+    else {$b = 1;}
+
+    $a = floor(($i)/2) * 80 * $b;
+    echo "<img src='images/back.svg' 
+    style='width:75px; 
+    position:fixed;
+    top:200px;
+    left:50%;
+    transform:translateX(".$a."px) translateX(-50%);
+    '>";
+    $i++;
+}
+
+*/
+
+
 echo "</div>";
 
 
 
 
+
+
 $stapel = $game['stapel'];
-echo "stapel: <br>".$stapel."<br>";
+//echo "stapel: <br>".$stapel."<br>";
 $stapel = json_decode($stapel);
 
 
 $pakstapel = json_decode($game['pakstapel']);
+
+
+for ($i=0;$i<count($pakstapel);$i++) 
+    {
+        echo "<img src='images/back.svg' 
+        style='width:75px;
+        position:fixed;
+        bottom:50%;
+        left:50%;
+        transform:translate(50%, 50%) translateY(".-$i."px);
+        '></button>";
+    }
+   
 
 $turn = $game['turn'];
 $sql = "SELECT users.username, players.nummer FROM players JOIN users ON players.user = users.id WHERE nummer = $turn";
@@ -159,10 +309,13 @@ function getkaartfromid($kaartid) {
     else return $kaartid % 13;
 }
 
+
+
+
 if (count($stapel) > 0) {
+    echo "<div id='stapel'>";
     $bovenstekaartid = end($stapel);
     $bovenstekaart = getkaartfromid($bovenstekaartid);
-    echo " <br><img src='images/".$bovenstekaartid.".svg' style=width:75px;> <br>";
 
 
     $i = 2;
@@ -172,13 +325,43 @@ if (count($stapel) > 0) {
             break;
         }
         $bovenstekaart = getkaartfromid($stapel[count($stapel) - $i]);
-        echo "<img src='images/".$stapel[count($stapel) - $i].".svg' style=width:75px;> <br>";
+        $a = ($i-1)*15;
+        /*
+        echo "<img src='images/".$stapel[count($stapel) - $i].".svg' style='
+        width:75px;
+        position:fixed;
+        bottom:50%;
+        left:50%;
+        transform: translate(-50%,50%) translateY(".$a."px);
+        z-index:-$i;
+        '
+        > ";*/
         $i++;
     }
+
+    echo "</div>";
 }
 else {
     $bovenstekaartid = -1; // lege stapel dus geen kaart
     $bovenstekaart = -1;
+}
+
+
+$i = 0;
+foreach ($stapel as $kaart)
+{
+    echo " <br><img src='images/".$kaart.".svg' style='
+    width:75px;
+    position:fixed;
+    bottom:50%;
+    left:50%;
+    transform: translate(-50%,50%) translateY(".-15*$i."px);
+    '
+
+    > ";
+    $i++;
+
+
 }
 
 function possibleMove(array $move)  

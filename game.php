@@ -217,26 +217,30 @@ function validCard(int $move) {
 
 function refillCards(bool $forPlayer) {
     global $pakstapel;
-    if ($forPlayer) global $kaarten;
+    if ($forPlayer) {
+        global $kaarten;
+        $localkaarten = $kaarten;
+    }
     else {
         global $botkaarten;
-        $kaarten = $botkaarten;
+        $localkaarten = $botkaarten;
     }
 
     for ($i = 0; $i < 13; $i++) {
         $currentCards = [$i, $i + 13, $i + 26, $i + 39];
 
-        if (count(array_intersect($kaarten, $currentCards)) == 4) {
-            $kaarten = array_values(array_diff($kaarten, [$i, $i + 13, $i + 26, $i + 39]));
+        if (count(array_intersect($localkaarten, $currentCards)) == 4) {
+            $localkaarten = array_values(array_diff($localkaarten, [$i, $i + 13, $i + 26, $i + 39]));
         }
     }
 
-    while (count($kaarten) < 3 && count($pakstapel) > 0)
+    while (count($localkaarten) < 3 && count($pakstapel) > 0)
     {
-        $kaarten[] = array_shift($pakstapel);
+        $localkaarten[] = array_shift($pakstapel);
     }
 
-    if (!$forPlayer) $botkaarten = $kaarten;
+    if (!$forPlayer) $botkaarten = $localkaarten;
+    else $kaarten = $localkaarten;
 }
 
 function playmove(array $move) {
@@ -393,6 +397,8 @@ function botMove() {
         $conn->query("UPDATE players SET hand = '$botkaarten' WHERE nummer = '$turn' AND serverid = '$gameid'");
         
         $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");
+
+
     }
     else {
         foreach ($move as $movekaart) {
@@ -440,9 +446,12 @@ if ($result->num_rows > 0) {
     
 
 if ($turn >= $lowestbotnumber && $game['winner'] == null) {
-    usleep(1000000);
+  //  usleep(1000000);
     botMove();
+    
 }
+
+
 
 if (isset($_POST['playMove']) && $game['winner'] == null) {
     $value = $_POST['move'];

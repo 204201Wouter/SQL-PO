@@ -91,8 +91,11 @@ function startServer() {
       //  $conn->query("UPDATE servers SET turn = ".$_SESSION['username'] ." WHERE id = '".$_SESSION['username'] ."'");
 
         $hands = [[],[],[],[]];
+        $kaartenvooropen = [[],[],[],[]];
+        $kaartenvoorgesloten = [[],[],[],[]];
+
         $cards = [];
-        for ($i = 0; $i<20;$i++)
+        for ($i = 0; $i < 54;$i++)
         {
             $cards[] = $i;
         }
@@ -100,17 +103,14 @@ function startServer() {
         shuffle($cards);
 
         for ($i = 0; $i < 3; $i++) {
-            $hands[0][] = array_shift($cards);
-            $hands[1][] = array_shift($cards);
-            $hands[2][]  = array_shift($cards);
-            $hands[3][]  = array_shift($cards);
+            for ($j = 0; $j < 4; $j++) {
+                $hands[$j][] = array_shift($cards);
+                $kaartenvooropen[$j][] = array_shift($cards);
+                $kaartenvoorgesloten[$j][] = array_shift($cards);
+            }
         }
-        
 
-
-
-        $stmt = $conn->prepare("UPDATE players SET hand = ? WHERE id = ?");
-        //$conn->query("UPDATE players SET hand = '".json_encode($player1hand)."' WHERE gameid = '".$_GET['id']."' LIMIT 1");
+        $stmt = $conn->prepare("UPDATE players SET hand = ?, kaartenvooropen = ?, kaartenvoorgesloten = ? WHERE id = ?");
         
         
         $sql = "SELECT * FROM players WHERE serverid = '".$_GET["id"]."'";
@@ -119,10 +119,10 @@ function startServer() {
         
 
         $i = 0;
-        for ($i2 = $result->num_rows; $i2 < 4; $i2++) {
-            $i3 = -$i2;
+        for ($j = $result->num_rows; $j < 4; $j++) {
+            $k = -$j;
             $sql = $conn->query("INSERT INTO players (id, user, serverid, nummer)
-            VALUES ($i3, -1, '".$_GET['id']."', $i2 )");
+            VALUES ($k, -1, '".$_GET['id']."', $j )");
         }
 
 
@@ -132,7 +132,7 @@ function startServer() {
         
     
         while ($row = $result->fetch_assoc()) {
-            $stmt->bind_param('si', json_encode($hands[$i]), $row['id']);
+            $stmt->bind_param('sssi', json_encode($hands[$i]), json_encode($kaartenvooropen[$i]), json_encode($kaartenvoorgesloten[$i]), $row['id']);
             $stmt->execute();
 
             $i++;

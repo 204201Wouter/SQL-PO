@@ -97,9 +97,8 @@ session_start();
     }
 </script>
 
+
 <?php 
-
-
 if ($_SESSION["loggedin"] != true)
 {
     header("Location: inlog.php");
@@ -121,16 +120,17 @@ $game = $conn->query("SELECT * FROM games WHERE id = '$gameid'");
 
 if ($game->num_rows == 0) 
 {
-  
     header("Location: home.php");
     exit();
 }
 $game = $game->fetch_assoc();
 
 
-$you = $conn->query("SELECT hand, nummer FROM players WHERE id = '".$_SESSION['id']."'")->fetch_assoc();
+$you = $conn->query("SELECT hand, nummer, kaartenvooropen, kaartenvoorgesloten FROM players WHERE id = '".$_SESSION['id']."'")->fetch_assoc();
 
 $kaarten = $you['hand'];
+$kaartenvooropen = $you['hand'];
+$kaartenvoorgesloten = $you['hand'];
 $yournummer = $you['nummer'];
 
 //echo "jouw kaarten: <br>".$kaarten."<br>";
@@ -248,51 +248,30 @@ foreach ($enemykaarten as $kaart)
     '>";
     $i++;
 }
-
-
-
-
 echo "</div>";
 
 
-
-
-
-
 $stapel = $game['stapel'];
-//echo "stapel: <br>".$stapel."<br>";
 $stapel = json_decode($stapel);
 
-//echo $game['pakstapel'];
 $pakstapel = json_decode($game['pakstapel']);
 
-//echo $pakstapel;
-for ($i=0;$i>-count($pakstapel);$i--) 
-    {
-        
+for ($i = 0; $i > -count($pakstapel); $i--) 
+{   
     echo "<img src='images/back.svg'
         style='width:75px;
         position:fixed;
         bottom:50%;
         left:50%;
         transform:translate(50%, 50%) translateY(" . $i . "px);'>";
-    }
+}
 
-   
 
 $turn = $game['turn'];
 $sql = "SELECT users.username, players.nummer FROM players JOIN users ON players.user = users.id WHERE nummer = $turn";
 $result = $conn->query($sql)->fetch_assoc();
 
 $turnName = $result['username'];
-
-
-
-
-
-
-//if ($turn >= 0) $turnName = $conn->query("SELECT username FROM users WHERE id = '$turn'")->fetch_assoc()['username'];
-//else $turnName = "bot " . abs($turn);
 
 
 if ($game['winner'] == null) {
@@ -316,8 +295,6 @@ function getkaartfromid($kaartid) {
 }
 
 
-
-
 if (count($stapel) > 0) {
     echo "<div id='stapel'>";
     $bovenstekaartid = end($stapel);
@@ -332,15 +309,6 @@ if (count($stapel) > 0) {
         }
         $bovenstekaart = getkaartfromid($stapel[count($stapel) - $i]);
         $a = ($i-1)*15;
-        /*
-        echo "<img src='images/".$stapel[count($stapel) - $i].".svg' style='
-        width:75px;
-        position:fixed;
-        bottom:50%;
-        left:50%;
-        transform: translate(-50%,50%) translateY(".$a."px);
-        z-index:-$i;
-        '> ";*/
         $i++;
     }
 
@@ -355,17 +323,13 @@ else {
 $i = 0;
 foreach ($stapel as $kaart)
 {
-
-
-echo "<br><img src='images/" . $kaart . ".svg' style='
-    width:75px;
-    position:fixed;
-    bottom:50%;
-    left:50%;
-    transform: translate(-50%,50%) translateY(" . $i . "px);'>";
-    $i-= 15;
-
-
+    echo "<br><img src='images/" . $kaart . ".svg' style='
+        width:75px;
+        position:fixed;
+        bottom:50%;
+        left:50%;
+        transform: translate(-50%,50%) translateY(" . $i . "px);'>";
+        $i-= 15;
 }
 
 function possibleMove(array $move)  
@@ -441,25 +405,7 @@ function playmove(array $move) {
     global $yournummer;
 
     
-   // $result = $conn->query("SELECT * FROM games WHERE id = $turn");
-
-   // $nummer = $result->fetch_assoc()['nummer'];
-  //  print_r($conn->query("SELECT * FROM players WHERE nummer = $nummer")->fetch_assoc()["id"]);
-
-
     $nextplayer = ($game["turn"]+1)%4;
-
-    //print_r($nextplayer );
- 
-
-
-  //  mysqli_data_seek($result,0);
-
-    /*
-    if ($game['player1'] == $playerid) $nextplayerid = $game['player2'];
-    else if ($game['player2'] == $playerid) $nextplayerid = $game['player3'];
-    else if ($game['player3'] == $playerid) $nextplayerid = $game['player4'];
-    else $nextplayerid = $game['player1'];*/
 
  
     if ($yournummer == $turn) {
@@ -500,10 +446,7 @@ function playmove(array $move) {
         else if (!possibleMove($kaarten))
         {
             $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");
-            
-
-
-           // print_r($stapel); 
+        
             
             foreach ($stapel as $kaart)
             {
@@ -519,8 +462,8 @@ function playmove(array $move) {
             $conn->query("UPDATE games SET stapel = '$stapel' WHERE id = '$gameid'");
             $conn->query("UPDATE games SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
             $conn->query("UPDATE players SET hand = '$kaarten' WHERE id = '".$_SESSION['id']."'");
-        //    echo "<script>location.reload();</script>";
-          //  exit();
+            echo "<script>location.reload();</script>";
+            exit();
         }
     }
         
@@ -625,8 +568,8 @@ function botMove() {
         $conn->query("UPDATE players SET hand = '$botkaarten' WHERE nummer = '$turn' AND serverid = '$gameid'");
     }
 
-  //  echo "<script>location.reload();</script>";
-   // exit();
+    echo "<script>location.reload();</script>";
+    exit();
 }
 
 
@@ -634,16 +577,14 @@ $result = $conn->query("SELECT * FROM players WHERE serverid = '$gameid' AND use
 $lowestbotnumber = 3;
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        if ($row["nummer"] < $lowestbotnumber)
-        $lowestbotnumber = $row["nummer"];
+        if ($row["nummer"] < $lowestbotnumber) $lowestbotnumber = $row["nummer"];
     }
 }
     
 
 if ($turn >= $lowestbotnumber && $game['winner'] == null) {
-  //  usleep(1000000);
+    //usleep(1000000);
     botMove();
-    
 }
 
 
@@ -651,6 +592,7 @@ if ($turn >= $lowestbotnumber && $game['winner'] == null) {
 if (isset($_POST['playMove']) && $game['winner'] == null) {
     $value = $_POST['move'];
     playmove(json_decode($value));
+    unset($_POST['playMove']);
 }
 ?>
 </body>

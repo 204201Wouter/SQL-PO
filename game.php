@@ -99,9 +99,11 @@ session_start();
 
 
 <?php 
+ob_start();
 if ($_SESSION["loggedin"] != true)
 {
     header("Location: inlog.php");
+    ob_end_flush();
     exit();
 }
 
@@ -121,6 +123,7 @@ $game = $conn->query("SELECT * FROM games WHERE id = '$gameid'");
 if ($game->num_rows == 0) 
 {
     header("Location: home.php");
+    ob_end_flush();
     exit();
 }
 $game = $game->fetch_assoc();
@@ -440,7 +443,8 @@ function playmove(array $move) {
             $conn->query("UPDATE games SET stapel = '$stapel' WHERE id = '$gameid'");
             $conn->query("UPDATE games SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
             $conn->query("UPDATE players SET hand = '$kaarten' WHERE id = '".$_SESSION['id']."'");
-            echo "<script>location.reload();</script>";
+            header("Refresh:0");
+            ob_end_flush();
             exit();
         }
         else if (!possibleMove($kaarten))
@@ -462,7 +466,8 @@ function playmove(array $move) {
             $conn->query("UPDATE games SET stapel = '$stapel' WHERE id = '$gameid'");
             $conn->query("UPDATE games SET pakstapel = '$pakstapel' WHERE id = '$gameid'");
             $conn->query("UPDATE players SET hand = '$kaarten' WHERE id = '".$_SESSION['id']."'");
-            echo "<script>location.reload();</script>";
+            header("Refresh:0");
+            ob_end_flush();
             exit();
         }
     }
@@ -568,7 +573,8 @@ function botMove() {
         $conn->query("UPDATE players SET hand = '$botkaarten' WHERE nummer = '$turn' AND serverid = '$gameid'");
     }
 
-    echo "<script>location.reload();</script>";
+    header("Refresh:0");
+    ob_end_flush();
     exit();
 }
 
@@ -592,7 +598,6 @@ if ($turn >= $lowestbotnumber && $game['winner'] == null) {
 if (isset($_POST['playMove']) && $game['winner'] == null) {
     $value = $_POST['move'];
     playmove(json_decode($value));
-    unset($_POST['playMove']);
 }
 ?>
 </body>

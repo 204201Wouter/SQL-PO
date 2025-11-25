@@ -54,8 +54,8 @@ session_start();
         const input = document.getElementById('input');
         const card = document.getElementById(text);
 
-        console.log(card);
-        console.log("e");
+        //console.log(card);
+       // console.log("e");
         function getkaartfromid(kaartid) {
             if (kaartid > 51) return 13;
             else return kaartid % 13;
@@ -70,11 +70,11 @@ session_start();
            // console.log(array);
 
             
-            if (!array.includes(text) && (array.length == 0 || (array.length > 0 && getkaartfromid(array[0]) == getkaartfromid(text) ) )) {
+            if ((pakken && !array.includes(text)) || (!pakken && !array.includes(text) && (array.length == 0 || (array.length > 0 && getkaartfromid(array[0]) == getkaartfromid(text) ) ))) {
                 array.push(text);
                // console.log(array);
                 input.value = JSON.stringify(array);
-              //  card.style.transform += "translateY(-10px)";
+                card.style.transform += "translateY(-5px)";
             
                 
             }
@@ -82,7 +82,7 @@ session_start();
                 
                 array.splice(array.indexOf(text),1);
                 input.value = JSON.stringify(array);
-               // card.style.transform += "translateY(10px)";
+                card.style.transform += "translateY(5px)";
 
             }
             
@@ -143,9 +143,19 @@ $cardsize = 65;
 $kaarten = json_decode($kaarten);
 
 
+if (count($kaarten) >= 3)  {
+    echo "<script>pakken=false</script>";
+}
+else {
+    echo "<script>pakken=true</script>";
+}
 
 
-function drawHand($kaarten, $hand, $height, $open, $layer)
+
+
+
+
+function drawHand($kaarten, $hand, $height, $gesloten, $layer)
 {
     global $cardsize;
 
@@ -162,17 +172,35 @@ function drawHand($kaarten, $hand, $height, $open, $layer)
         }
         else {$b = 1;}
 
-        if ($open) {$kaart = "back";}
+        if ($gesloten) {$kaart = "back";}
+
+        
 
         $a = floor(($i)/2) * $margin  * $b;
+     
         if ($hand == 0) {
-        echo "<button class='card' onclick='insert($kaart)'><img id='$kaart' src='images/".$kaart.".svg' 
-        style='width:".$cardsize."px; 
-        position:fixed;
-        bottom:".$height."px;
-        left:50%;
-        transform:translateX(".$a."px) translateX(-50%)  translateY(".-$layer."px);
-        '></button>";
+            if (!$gesloten) {
+                echo "<button class='card' onclick='insert($kaart)'><img id='$kaart' src='images/".$kaart.".svg' 
+                style='width:".$cardsize."px; 
+                position:fixed;
+                bottom:".$height."px;
+                left:50%;
+                transform:translateX(".$a."px) translateX(-50%)  translateY(".-$layer."px);
+                z-index:".round($a).";
+                '></button>";}
+            
+            if ($gesloten) {
+                echo "<img src='images/back.svg' 
+                style='width:".$cardsize."px; 
+                position:fixed;
+                bottom:".$height."px;
+                left:50%;
+                transform:translateX(".$a."px) translateX(-50%)  translateY(".-$layer."px);
+                z-index:".round($a).";
+                '>";}
+
+
+
     }
         if ($hand == 1) {
 
@@ -309,7 +337,11 @@ $turnName = $result['username'];
 
 
 if ($game['winner'] == null) {
-    if (strcasecmp($turnName, $_SESSION['username']) == 0) echo "<br>Jij bent aan de beurt";
+    if (strcasecmp($turnName, $_SESSION['username']) == 0) {
+        echo "<br>Jij bent aan de beurt";
+        if (count($kaarten) >= 3 || count($kaartenvoorgesloten) == 0) {echo "<br>Leg kaart neer";}
+        else {echo "<br>Pak kaart(en)";}
+    }
     else echo "<br>$turnName is aan de beurt";
    // else echo "<br>$turnName is aan de beurt<meta http-equiv='refresh' content='2'>";
 }
@@ -365,7 +397,7 @@ foreach ($stapel as $kaart)
         position:fixed;
         bottom:50%;
         left:50%;
-        transform: translate(-50%,50%) translateY(" . $i+$a . "px);'>";
+        transform: translate(-50%,50%) translateY(" . $i-$a . "px);'>";
         $i-= 3;
 }
 
@@ -610,7 +642,7 @@ function pakKaartenVoor(array $input) {
     global $conn;
     
     foreach ($input as $kaart) {
-        if (in_array($kaart, $kaartenvooropen)) {
+        if (in_array($kaart, $kaartenvooropen) && count($kaarten) < 3) {
             $kaarten[] = $kaart;
             array_splice($kaartenvooropen, array_search($kaart, $kaartenvooropen), 1);
         }
@@ -655,7 +687,7 @@ if ($turn >= $lowestbotnumber && $game['winner'] == null) {
 
 if (isset($_POST['playMove']) && $game['winner'] == null) {
     $value = $_POST['move'];
-    if (count($kaarten) >= 3)  {
+    if (count($kaarten) >= 3 || count($kaartenvoorgesloten) == 0)  {
         playmove(json_decode($value));
     }
     else {

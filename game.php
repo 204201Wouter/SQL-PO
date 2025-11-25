@@ -591,6 +591,8 @@ function playmove(array $move) {
     global $stapel;
     global $pakstapel;
     global $yournummer;
+    global $kaartenvooropen;
+    global $kaartenvoorgesloten;
 
  
     if ($yournummer == $turn) {
@@ -627,9 +629,22 @@ function playmove(array $move) {
         $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '".$_SESSION['id']."'");
 
         if (count($kaarten) < 3){
-            header("Refresh:0");
-            ob_end_flush();
-            exit();
+            if (count($kaartenvooropen) > 0){
+                header("Refresh:0");
+                ob_end_flush();
+                exit();
+            }
+            else if (count($kaartenvoorgesloten) > 0) {
+                for ($i = 0; $i < 3 - count($kaarten); $i++) {
+                    if (count($kaartenvoorgesloten) > 0) $kaarten[] = array_shift($kaartenvoorgesloten);
+                }
+
+                $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '".$_SESSION['id']."'");
+                $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE id = '".$_SESSION['id']."'");
+
+                goNextTurn($kaarten);
+            }
+            else goNextTurn($kaarten);
         }
         else goNextTurn($kaarten);
     }
@@ -645,10 +660,12 @@ function botMove() {
     global $botkaarten;
 
 
-    $sql = "SELECT hand FROM players WHERE nummer = $turn AND serverid = '$gameid'";
+    $sql = "SELECT hand, kaartenvooropen, kaartenvoorgesloten FROM players WHERE nummer = $turn AND serverid = '$gameid'";
     $result = $conn->query($sql)->fetch_assoc();
 
     $botkaarten = json_decode($result['hand']);
+    $botkaartenvooropen = json_decode($result['kaartenvooropen']);
+    $botkaartenvoorgesloten = json_decode($result['kaartenvoorgesloten']);
     
     $laagstekaart = 13;
     $bestekaartid = -1;
@@ -706,16 +723,27 @@ function botMove() {
         
     refillCards(false);
 
+    if (count($botkaarten) < 3) {
+        for ($i = 0; $i < 3 - count($botkaarten); $i++) {
+            if (count($botkaartenvooropen) > 0) $botkaarten[] = array_shift($botkaartenvooropen);
+            else if (count($botkaartenvoorgesloten) > 0) $botkaarten[] = array_shift($botkaartenvoorgesloten);
+        }
+    }
+
     $conn->query("UPDATE games SET stapel = '" . json_encode($stapel) . "' WHERE id = '$gameid'");
     $conn->query("UPDATE games SET pakstapel = '" . json_encode($pakstapel) . "' WHERE id = '$gameid'");
     $conn->query("UPDATE players SET hand = '" . json_encode($botkaarten) . "' WHERE nummer = '$turn' AND serverid = '$gameid'");
+    $conn->query("UPDATE players SET kaartenvooropen = '" . json_encode($botkaartenvooropen) . "' WHERE nummer = '$turn' AND serverid = '$gameid'");
+    $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($botkaartenvoorgesloten) . "' WHERE nummer = '$turn' AND serverid = '$gameid'");
 
     goNextTurn($botkaarten);
 }
 
 function pakKaartenVoor(array $input) {
     global $kaartenvooropen;
+    global $kaartenvoorgesloten;
     global $kaarten;
+    global $conn;
     
     foreach ($input as $kaart) {
         if (in_array($kaart, $kaartenvooropen)) {
@@ -729,7 +757,20 @@ function pakKaartenVoor(array $input) {
         }
     }
 
-    goNextTurn($kaarten);
+    $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '".$_SESSION['id']."'");
+    $conn->query("UPDATE players SET kaartenvooropen = '" . json_encode($kaartenvooropen) . "' WHERE id = '".$_SESSION['id']."'");
+
+    if (count($kaarten) >= 3) goNextTurn($kaarten);
+    else if (count($kaartenvooropen) == 0) {
+        for ($i = 0; $i < 3 - count($kaarten); $i++) {
+            if (count($kaartenvoorgesloten) > 0) $kaarten[] = array_shift($kaartenvoorgesloten);
+        }
+
+        $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '".$_SESSION['id']."'");
+        $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE id = '".$_SESSION['id']."'");
+
+        goNextTurn($kaarten);
+    }
 }
 
 $result = $conn->query("SELECT * FROM players WHERE serverid = '$gameid' AND user = -1");

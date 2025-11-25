@@ -137,7 +137,7 @@ $kaartenvoorgesloten = json_decode($you['kaartenvoorgesloten']);
 $yournummer = $you['nummer'];
 
 $cardsize = 65;
-$margin = 70;
+
 
 //echo "jouw kaarten: <br>".$kaarten."<br>";
 $kaarten = json_decode($kaarten);
@@ -145,9 +145,14 @@ $kaarten = json_decode($kaarten);
 
 
 
-function drawHand($kaarten, $hand, $height, $open)
+function drawHand($kaarten, $hand, $height, $open, $layer)
 {
-    global $cardsize; global $margin;
+    global $cardsize;
+
+    $margin = 70;
+    if ($margin*count($kaarten) > 500) $margin = 500/count($kaarten);
+
+
     $i = 1;
     foreach ($kaarten as $kaart)
     {
@@ -166,7 +171,7 @@ function drawHand($kaarten, $hand, $height, $open)
         position:fixed;
         bottom:".$height."px;
         left:50%;
-        transform:translateX(".$a."px) translateX(-50%);
+        transform:translateX(".$a."px) translateX(-50%)  translateY(".-$layer."px);
         '></button>";
     }
         if ($hand == 1) {
@@ -176,7 +181,7 @@ function drawHand($kaarten, $hand, $height, $open)
         position:fixed;
         top:".$height."px;
         left:50%;
-        transform:translateX(".$a."px) translateX(-50%);
+        transform:translateX(".$a."px) translateX(-50%) rotate(180deg) translateY(".$layer."px);
         '>";
 
 
@@ -189,7 +194,7 @@ function drawHand($kaarten, $hand, $height, $open)
         position:fixed;
         top:50%;
         left:".$height."px;
-        transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
+        transform:translateY(".$a."px) translateY(-50%) rotate(90deg)  translateX(".-$layer."px);
         '>";
         }  
         if ($hand == 3) {
@@ -199,7 +204,7 @@ function drawHand($kaarten, $hand, $height, $open)
     position:fixed;
     top:50%;
     right:".$height."px;
-    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
+    transform:translateY(".$a."px) translateY(-50%) rotate(90deg) translateX(".-$layer."px);
     '>";
         }
         $i++;
@@ -212,9 +217,12 @@ function drawHand($kaarten, $hand, $height, $open)
 echo "<div id='hand'>";
 
 
-drawHand($kaarten, 0, 50, false);
-drawHand($kaartenvoorgesloten, 0, 150, true);
-drawHand($kaartenvooropen, 0, 160, false);
+
+
+// $margin*count($kaarten) = 1000
+drawHand($kaarten, 0, 50, false, 0);
+drawHand($kaartenvoorgesloten, 0, 150, true, 0);
+drawHand($kaartenvooropen, 0, 150, false, 5);
 
 
 
@@ -234,9 +242,9 @@ if ($enemykaarten == $kaarten)
 
 
 
-drawHand($enemykaarten, 1, 50, true);
-drawHand($kaartenvoorgesloten, 1, 150, true);
-drawHand($kaartenvooropen, 1, 160, false);
+drawHand($enemykaarten, 1, 50, true, 0);
+drawHand(json_decode($row['kaartenvoorgesloten']), 1, 160, true, 0);
+drawHand(json_decode($row['kaartenvooropen']), 1, 160, false, 5);
 
 
 
@@ -250,83 +258,11 @@ if ($enemykaarten == $kaarten)
     $enemykaarten = json_decode($row['hand']);  
 }
 
-drawHand($enemykaarten, 2, 50, true);
-drawHand($kaartenvoorgesloten, 2, 150, true);
-drawHand($kaartenvooropen, 2, 160, false);
+drawHand($enemykaarten, 2, 50, true, 0);
+drawHand(json_decode($row['kaartenvoorgesloten']), 2, 160, true, 0);
+drawHand(json_decode($row['kaartenvooropen']), 2, 160, false, 5);
 
 
-
-/*
-foreach ($enemykaarten as $kaart)
-{
-    if ($i % 2 == 0)
-    {
-        $b = -1;
-    }
-    else {$b = 1;}
-
-    $a = floor(($i)/2) * 80 * $b;
-    echo "<img src='images/back.svg' 
-    style='width:".$cardsize."px; 
-    position:fixed;
-    top:50%;
-    left:50px;
-    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
-    '>";
-    $i++;
-}
-
-
-
-
-$i = 1;
-$enemykaarten = json_decode($row['kaartenvoorgesloten']);
-foreach ($enemykaarten as $kaart)
-{
-    if ($i % 2 == 0)
-    {
-        $b = -1;
-    }
-    else {$b = 1;}
-
-    $a = floor(($i)/2) * 80 * $b;
-    echo "<img src='images/back.svg' 
-    style='width:".$cardsize."px; 
-    position:fixed;
-    top:50%;
-    left:190px;
-    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
-    '>";
-    $i++;
-}
-
-
-
-$i = 1;
-
-$enemykaarten = json_decode($row['kaartenvooropen']);
-foreach ($enemykaarten as $kaart)
-{
-    if ($i % 2 == 0)
-    {
-        $b = -1;
-    }
-    else {$b = 1;}
-
-    $a = floor(($i)/2) * 80 * $b;
-    echo "<img src='images/$kaart.svg' 
-    style='width:".$cardsize."px; 
-    position:fixed;
-    top:50%;
-    left:200px;
-    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
-    '>";
-    $i++;
-}
-
-
-
-*/
 
 
 
@@ -340,84 +276,9 @@ if ($enemykaarten == $kaarten)
     $enemykaarten = json_decode($row['hand']);  
 }
 
-drawHand($enemykaarten, 3, 50, true);
-drawHand($kaartenvoorgesloten, 3, 150, true);
-drawHand($kaartenvooropen, 3, 160, false);
-
-/*
-
-
-
-foreach ($enemykaarten as $kaart)
-{
-    if ($i % 2 == 0)
-    {
-        $b = -1;
-    }
-    else {$b = 1;}
-
-    $a = floor(($i)/2) * 80 * $b;
-    echo "<img src='images/back.svg' 
-    style='width:".$cardsize."px; 
-    position:fixed;
-    top:50%;
-    right:50px;
-    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
-    '>";
-    $i++;
-}
-
-
-
-$i = 1;
-
-$enemykaarten = json_decode($row['kaartenvoorgesloten']);
-foreach ($enemykaarten as $kaart)
-{
-    if ($i % 2 == 0)
-    {
-        $b = -1;
-    }
-    else {$b = 1;}
-
-    $a = floor(($i)/2) * 80 * $b;
-    echo "<img src='images/back.svg' 
-    style='width:".$cardsize."px; 
-    position:fixed;
-    top:50%;
-    right:190px;
-    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
-    '>";
-    $i++;
-}
-
-
-$i = 1;
-
-$enemykaarten = json_decode($row['kaartenvooropen']);
-foreach ($enemykaarten as $kaart)
-{
-    if ($i % 2 == 0)
-    {
-        $b = -1;
-    }
-    else {$b = 1;}
-
-    $a = floor(($i)/2) * 80 * $b;
-    echo "<img src='images/$kaart.svg' 
-    style='width:".$cardsize."px; 
-    position:fixed;
-    top:50%;
-    right:200px;
-    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
-    '>";
-    $i++;
-}
-
-
-*/
-
-
+drawHand($enemykaarten, 3, 50, true, 0);
+drawHand(json_decode($row['kaartenvoorgesloten']), 3, 160, true, 0);
+drawHand(json_decode($row['kaartenvooropen']), 3, 160, false, 5);
 
 
 
@@ -494,15 +355,18 @@ else {
 
 
 $i = 0;
+$a = 0;
 foreach ($stapel as $kaart)
-{
+{   
+    if (getkaartfromid($kaart) == 1 || getkaartfromid($kaart) == 13) {$a  = 10;}
+    else {$a = 0;}
     echo "<br><img src='images/" . $kaart . ".svg' style='
         width:".$cardsize."px;
         position:fixed;
         bottom:50%;
         left:50%;
-        transform: translate(-50%,50%) translateY(" . $i . "px);'>";
-        $i-= 15;
+        transform: translate(-50%,50%) translateY(" . $i+$a . "px);'>";
+        $i-= 3;
 }
 
 function possibleMove(array $move)  

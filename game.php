@@ -132,40 +132,116 @@ $game = $game->fetch_assoc();
 $you = $conn->query("SELECT hand, nummer, kaartenvooropen, kaartenvoorgesloten FROM players WHERE id = '".$_SESSION['id']."'")->fetch_assoc();
 
 $kaarten = $you['hand'];
-$kaartenvooropen = $you['hand'];
-$kaartenvoorgesloten = $you['hand'];
+$kaartenvooropen = json_decode($you['kaartenvooropen']);
+$kaartenvoorgesloten = json_decode($you['kaartenvoorgesloten']);
 $yournummer = $you['nummer'];
+
+$cardsize = 65;
+$margin = 70;
 
 //echo "jouw kaarten: <br>".$kaarten."<br>";
 $kaarten = json_decode($kaarten);
 
+
+
+
+function drawHand($kaarten, $hand, $height, $open)
+{
+    global $cardsize; global $margin;
+    $i = 1;
+    foreach ($kaarten as $kaart)
+    {
+        if ($i % 2 == 0)
+        {
+            $b = -1;
+        }
+        else {$b = 1;}
+
+        if ($open) {$kaart = "back";}
+
+        $a = floor(($i)/2) * $margin  * $b;
+        if ($hand == 0) {
+        echo "<button class='card' onclick='insert($kaart)'><img id='$kaart' src='images/".$kaart.".svg' 
+        style='width:".$cardsize."px; 
+        position:fixed;
+        bottom:".$height."px;
+        left:50%;
+        transform:translateX(".$a."px) translateX(-50%);
+        '></button>";
+    }
+        if ($hand == 1) {
+
+        echo "<img src='images/$kaart.svg' 
+        style='width:".$cardsize."px; 
+        position:fixed;
+        top:".$height."px;
+        left:50%;
+        transform:translateX(".$a."px) translateX(-50%);
+        '>";
+
+
+        }
+
+        if ($hand == 2) {
+
+        echo "<img src='images/$kaart.svg' 
+        style='width:".$cardsize."px; 
+        position:fixed;
+        top:50%;
+        left:".$height."px;
+        transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
+        '>";
+        }  
+        if ($hand == 3) {
+        
+            echo "<img src='images/$kaart.svg' 
+    style='width:".$cardsize."px; 
+    position:fixed;
+    top:50%;
+    right:".$height."px;
+    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
+    '>";
+        }
+        $i++;
+    }
+
+
+}
+
+
 echo "<div id='hand'>";
-$i = 1;
-foreach ($kaarten as $kaart)
-{
-    if ($i % 2 == 0)
-    {
-        $b = -1;
-    }
-    else {$b = 1;}
 
-    $a = floor(($i)/2) * 80 * $b;
-    echo "<button class='card' onclick='insert($kaart)'><img id='$kaart' src='images/".$kaart.".svg' 
-    style='width:75px; 
-    position:fixed;
-    bottom:50px;
-    left:50%;
-    transform:translateX(".$a."px) translateX(-50%);
-    '></button>";
-    $i++;
-}
+
+drawHand($kaarten, 0, 50, false);
+drawHand($kaartenvoorgesloten, 0, 150, true);
+drawHand($kaartenvooropen, 0, 160, false);
 
 
 
 
-$sql = "SELECT hand FROM players WHERE serverid = '$gameid'";
+$sql = "SELECT hand, kaartenvooropen, kaartenvoorgesloten FROM players WHERE serverid = '$gameid'";
 $result = $conn->query($sql);
-$i = 1;
+$row = $result->fetch_assoc();
+
+
+
+$enemykaarten = json_decode($row['hand']);
+if ($enemykaarten == $kaarten)
+{
+    $row = $result->fetch_assoc();
+    $enemykaarten = json_decode($row['hand']);  
+}
+
+
+
+drawHand($enemykaarten, 1, 50, true);
+drawHand($kaartenvoorgesloten, 1, 150, true);
+drawHand($kaartenvooropen, 1, 160, false);
+
+
+
+
+
 $row = $result->fetch_assoc();
 $enemykaarten = json_decode($row['hand']);
 if ($enemykaarten == $kaarten)
@@ -173,6 +249,104 @@ if ($enemykaarten == $kaarten)
     $row = $result->fetch_assoc();
     $enemykaarten = json_decode($row['hand']);  
 }
+
+drawHand($enemykaarten, 2, 50, true);
+drawHand($kaartenvoorgesloten, 2, 150, true);
+drawHand($kaartenvooropen, 2, 160, false);
+
+
+
+/*
+foreach ($enemykaarten as $kaart)
+{
+    if ($i % 2 == 0)
+    {
+        $b = -1;
+    }
+    else {$b = 1;}
+
+    $a = floor(($i)/2) * 80 * $b;
+    echo "<img src='images/back.svg' 
+    style='width:".$cardsize."px; 
+    position:fixed;
+    top:50%;
+    left:50px;
+    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
+    '>";
+    $i++;
+}
+
+
+
+
+$i = 1;
+$enemykaarten = json_decode($row['kaartenvoorgesloten']);
+foreach ($enemykaarten as $kaart)
+{
+    if ($i % 2 == 0)
+    {
+        $b = -1;
+    }
+    else {$b = 1;}
+
+    $a = floor(($i)/2) * 80 * $b;
+    echo "<img src='images/back.svg' 
+    style='width:".$cardsize."px; 
+    position:fixed;
+    top:50%;
+    left:190px;
+    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
+    '>";
+    $i++;
+}
+
+
+
+$i = 1;
+
+$enemykaarten = json_decode($row['kaartenvooropen']);
+foreach ($enemykaarten as $kaart)
+{
+    if ($i % 2 == 0)
+    {
+        $b = -1;
+    }
+    else {$b = 1;}
+
+    $a = floor(($i)/2) * 80 * $b;
+    echo "<img src='images/$kaart.svg' 
+    style='width:".$cardsize."px; 
+    position:fixed;
+    top:50%;
+    left:200px;
+    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
+    '>";
+    $i++;
+}
+
+
+
+*/
+
+
+
+
+
+$row = $result->fetch_assoc();
+$enemykaarten = json_decode($row['hand']);
+if ($enemykaarten == $kaarten)
+{
+    $row = $result->fetch_assoc();
+    $enemykaarten = json_decode($row['hand']);  
+}
+
+drawHand($enemykaarten, 3, 50, true);
+drawHand($kaartenvoorgesloten, 3, 150, true);
+drawHand($kaartenvooropen, 3, 160, false);
+
+/*
+
+
 
 foreach ($enemykaarten as $kaart)
 {
@@ -184,25 +358,20 @@ foreach ($enemykaarten as $kaart)
 
     $a = floor(($i)/2) * 80 * $b;
     echo "<img src='images/back.svg' 
-    style='width:75px; 
+    style='width:".$cardsize."px; 
     position:fixed;
-    top:10px;
-    left:50%;
-    transform:translateX(".$a."px) translateX(-50%);
+    top:50%;
+    right:50px;
+    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
     '>";
     $i++;
 }
 
 
-$i = 1;
-$row = $result->fetch_assoc();
-$enemykaarten = json_decode($row['hand']);
-if ($enemykaarten == $kaarten)
-{
-    $row = $result->fetch_assoc();
-    $enemykaarten = json_decode($row['hand']);  
-}
 
+$i = 1;
+
+$enemykaarten = json_decode($row['kaartenvoorgesloten']);
 foreach ($enemykaarten as $kaart)
 {
     if ($i % 2 == 0)
@@ -213,26 +382,19 @@ foreach ($enemykaarten as $kaart)
 
     $a = floor(($i)/2) * 80 * $b;
     echo "<img src='images/back.svg' 
-    style='width:75px; 
+    style='width:".$cardsize."px; 
     position:fixed;
-    top:100px;
-    left:50%;
-    transform:translateX(".$a."px) translateX(-50%);
+    top:50%;
+    right:190px;
+    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
     '>";
     $i++;
 }
 
 
 $i = 1;
-$row = $result->fetch_assoc();
-$enemykaarten = json_decode($row['hand']);
-if ($enemykaarten == $kaarten)
-{
-    $row = $result->fetch_assoc();
-    $enemykaarten = json_decode($row['hand']);  
-}
 
-
+$enemykaarten = json_decode($row['kaartenvooropen']);
 foreach ($enemykaarten as $kaart)
 {
     if ($i % 2 == 0)
@@ -242,15 +404,23 @@ foreach ($enemykaarten as $kaart)
     else {$b = 1;}
 
     $a = floor(($i)/2) * 80 * $b;
-    echo "<img src='images/back.svg' 
-    style='width:75px; 
+    echo "<img src='images/$kaart.svg' 
+    style='width:".$cardsize."px; 
     position:fixed;
-    top:200px;
-    left:50%;
-    transform:translateX(".$a."px) translateX(-50%);
+    top:50%;
+    right:200px;
+    transform:translateY(".$a."px) translateY(-50%) rotate(90deg);
     '>";
     $i++;
 }
+
+
+*/
+
+
+
+
+
 echo "</div>";
 
 
@@ -262,7 +432,7 @@ $pakstapel = json_decode($game['pakstapel']);
 for ($i = 0; $i > -count($pakstapel); $i--) 
 {   
     echo "<img src='images/back.svg'
-        style='width:75px;
+        style='width:".$cardsize."px;
         position:fixed;
         bottom:50%;
         left:50%;
@@ -327,7 +497,7 @@ $i = 0;
 foreach ($stapel as $kaart)
 {
     echo "<br><img src='images/" . $kaart . ".svg' style='
-        width:75px;
+        width:".$cardsize."px;
         position:fixed;
         bottom:50%;
         left:50%;

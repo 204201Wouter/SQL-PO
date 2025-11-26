@@ -49,7 +49,7 @@ session_start();
         console.log(object.style.left );
 
     }
-    function insert(text)
+    function insert(text, kaartVoor)
     {
         const input = document.getElementById('input');
         const card = document.getElementById(text);
@@ -61,39 +61,22 @@ session_start();
             else return kaartid % 13;
         }
 
-
-        
-
-     
         try {
             let array = JSON.parse(input.value);
-           // console.log(array);
-
             
-            if ((pakken && !array.includes(text)) || (!pakken && !array.includes(text) && (array.length == 0 || (array.length > 0 && getkaartfromid(array[0]) == getkaartfromid(text) ) ))) {
+            if (pakken == kaartVoor && ((pakken && !array.includes(text)) || (!pakken && !array.includes(text) && (array.length == 0 || (array.length > 0 && getkaartfromid(array[0]) == getkaartfromid(text)))))) {
                 array.push(text);
-               // console.log(array);
                 input.value = JSON.stringify(array);
                 card.style.transform += "translateY(-5px)";
-            
-                
             }
             else if (array.includes(text))  {
-                
                 array.splice(array.indexOf(text),1);
                 input.value = JSON.stringify(array);
                 card.style.transform += "translateY(5px)";
-
             }
-            
         } catch (e) {
             console.error(e);
         }
-
-      //  moveto(card,[0,0],[0,-50])
-
-
-
     }
 </script>
 
@@ -111,7 +94,6 @@ $conn = new mysqli("localhost", "root", "", "zweeds pesten");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
 
 
 $gameid = $_GET['id'];
@@ -151,45 +133,35 @@ else {
 }
 
 
-
-
-
-
-function drawHand($kaarten, $hand, $height, $gesloten, $layer)
+function drawHand($kaarten, $hand, $height, $gesloten, $layer, $kaartvoor)
 {
     global $cardsize;
 
     $margin = 70;
     if ($margin*count($kaarten) > 500) $margin = 500/count($kaarten);
 
-
     $i = 1;
     foreach ($kaarten as $kaart)
     {
-        if ($i % 2 == 0)
-        {
-            $b = -1;
-        }
-        else {$b = 1;}
+        if ($i % 2 == 0) $b = -1;
+        else $b = 1;
 
-        if ($gesloten) {$kaart = "back";}
+        if ($gesloten) $kaart = "back";
 
-        
 
         $a = floor(($i)/2) * $margin  * $b;
-     
         if ($hand == 0) {
             if (!$gesloten) {
-                echo "<button class='card' onclick='insert($kaart)'><img id='$kaart' src='images/".$kaart.".svg' 
+                echo "<button class='card' onclick='insert($kaart, $kaartvoor)'><img id='$kaart' src='images/".$kaart.".svg' 
                 style='width:".$cardsize."px; 
                 position:fixed;
                 bottom:".$height."px;
                 left:50%;
                 transform:translateX(".$a."px) translateX(-50%)  translateY(".-$layer."px);
                 z-index:".round($a).";
-                '></button>";}
-            
-            if ($gesloten) {
+                '></button>";
+            }            
+            else {
                 echo "<img src='images/back.svg' 
                 style='width:".$cardsize."px; 
                 position:fixed;
@@ -197,61 +169,48 @@ function drawHand($kaarten, $hand, $height, $gesloten, $layer)
                 left:50%;
                 transform:translateX(".$a."px) translateX(-50%)  translateY(".-$layer."px);
                 z-index:".round($a).";
-                '>";}
-
-
-
-    }
-        if ($hand == 1) {
-
-        echo "<img src='images/$kaart.svg' 
-        style='width:".$cardsize."px; 
-        position:fixed;
-        top:".$height."px;
-        left:50%;
-        transform:translateX(".$a."px) translateX(-50%) rotate(180deg) translateY(".$layer."px);
-        '>";
-
-
+                '>";
+            }
         }
-
-        if ($hand == 2) {
-
-        echo "<img src='images/$kaart.svg' 
-        style='width:".$cardsize."px; 
-        position:fixed;
-        top:50%;
-        left:".$height."px;
-        transform:translateY(".$a."px) translateY(-50%) rotate(90deg)  translateX(".-$layer."px);
-        '>";
-        }  
-        if ($hand == 3) {
-        
+        else if ($hand == 1) {
             echo "<img src='images/$kaart.svg' 
-    style='width:".$cardsize."px; 
-    position:fixed;
-    top:50%;
-    right:".$height."px;
-    transform:translateY(".$a."px) translateY(-50%) rotate(90deg) translateX(".-$layer."px);
-    '>";
+            style='width:".$cardsize."px; 
+            position:fixed;
+            top:".$height."px;
+            left:50%;
+            transform:translateX(".$a."px) translateX(-50%) rotate(180deg) translateY(".$layer."px);
+            '>";
+        }
+        else if ($hand == 2) {
+            echo "<img src='images/$kaart.svg' 
+            style='width:".$cardsize."px; 
+            position:fixed;
+            top:50%;
+            left:".$height."px;
+            transform:translateY(".$a."px) translateY(-50%) rotate(90deg)  translateX(".-$layer."px);
+            '>";
+        }  
+        else if ($hand == 3) {
+            echo "<img src='images/$kaart.svg' 
+            style='width:".$cardsize."px; 
+            position:fixed;
+            top:50%;
+            right:".$height."px;
+            transform:translateY(".$a."px) translateY(-50%) rotate(90deg) translateX(".-$layer."px);
+            '>";
         }
         $i++;
     }
-
-
 }
 
 
 echo "<div id='hand'>";
 
 
-
-
 // $margin*count($kaarten) = 1000
-drawHand($kaarten, 0, 50, false, 0);
-drawHand($kaartenvoorgesloten, 0, 150, true, 0);
-drawHand($kaartenvooropen, 0, 150, false, 5);
-
+drawHand($kaarten, 0, 50, false, 0, "false");
+drawHand($kaartenvoorgesloten, 0, 150, true, 0, "true");
+drawHand($kaartenvooropen, 0, 150, false, 5, "true");
 
 
 
@@ -260,7 +219,6 @@ $result = $conn->query($sql);
 $row = $result->fetch_assoc();
 
 
-
 $enemykaarten = json_decode($row['hand']);
 if ($enemykaarten == $kaarten)
 {
@@ -269,13 +227,9 @@ if ($enemykaarten == $kaarten)
 }
 
 
-
-drawHand($enemykaarten, 1, 50, true, 0);
-drawHand(json_decode($row['kaartenvoorgesloten']), 1, 160, true, 0);
-drawHand(json_decode($row['kaartenvooropen']), 1, 160, false, 5);
-
-
-
+drawHand($enemykaarten, 1, 50, true, 0, "false");
+drawHand(json_decode($row['kaartenvoorgesloten']), 1, 160, true, 0, "false");
+drawHand(json_decode($row['kaartenvooropen']), 1, 160, false, 5, "false");
 
 
 $row = $result->fetch_assoc();
@@ -286,14 +240,9 @@ if ($enemykaarten == $kaarten)
     $enemykaarten = json_decode($row['hand']);  
 }
 
-drawHand($enemykaarten, 2, 50, true, 0);
-drawHand(json_decode($row['kaartenvoorgesloten']), 2, 160, true, 0);
-drawHand(json_decode($row['kaartenvooropen']), 2, 160, false, 5);
-
-
-
-
-
+drawHand($enemykaarten, 2, 50, true, 0, "false");
+drawHand(json_decode($row['kaartenvoorgesloten']), 2, 160, true, 0, "false");
+drawHand(json_decode($row['kaartenvooropen']), 2, 160, false, 5, "false");
 
 
 $row = $result->fetch_assoc();
@@ -304,9 +253,9 @@ if ($enemykaarten == $kaarten)
     $enemykaarten = json_decode($row['hand']);  
 }
 
-drawHand($enemykaarten, 3, 50, true, 0);
-drawHand(json_decode($row['kaartenvoorgesloten']), 3, 160, true, 0);
-drawHand(json_decode($row['kaartenvooropen']), 3, 160, false, 5);
+drawHand($enemykaarten, 3, 50, true, 0, "false");
+drawHand(json_decode($row['kaartenvoorgesloten']), 3, 160, true, 0, "false");
+drawHand(json_decode($row['kaartenvooropen']), 3, 160, false, 5, "false");
 
 
 

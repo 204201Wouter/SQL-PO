@@ -25,7 +25,8 @@ CREATE TABLE `Players` (
   `kaartenvooropen` text,
   `kaartenvoorgesloten` text,
   `serverid` VARCHAR(36),
-  `nummer` integer
+  `nummer` integer,
+  `ready` tinyint
 );
 
 ALTER TABLE `Servers` ADD FOREIGN KEY (`gameid`) REFERENCES `Games` (`id`);

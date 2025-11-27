@@ -121,8 +121,8 @@ function startServer() {
         $i = 0;
         for ($j = $result->num_rows; $j < 4; $j++) {
             $k = -$j;
-            $sql = $conn->query("INSERT INTO players (id, user, serverid, nummer)
-            VALUES ($k, -1, '".$_GET['id']."', $j )");
+            $conn->query("INSERT INTO players (id, user, serverid, nummer, ready)
+            VALUES ($k, -1, '".$_GET['id']."', $j, 1)");
         }
 
 

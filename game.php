@@ -6,41 +6,45 @@ session_start();
         .card {
             padding: 0;
             background-color: transparent;
-        
             border: none;
             margin: 5px;
-
-   
-         
-
         }
 
         #hand {
-          
             position: fixed;
             left: 50%;
             bottom: 10px;
-
         }
+
         #stapel {
             position: fixed;
             left: 50%;
             top: 50%; 
             transform: translate(-50%,-50%);
-         
         }
-
     </style>
 </head>
 
 <body style="background-color:#008531;">
 <form method="post">
-  <input type="text" name="move" placeholder="move" id="input" value="[]" style="display:block;">
-  <button type="submit" name="playMove" style='position:fixed;left:50%;bottom:10;transform:translateX(-50%);'>Play Move</button>
+    <input type="text" name="move" placeholder="move" id="input" value="[]" style="display:block;">
+    <button type="submit" name="playMove" id="playMoveButton" style='position:fixed;left:50%;bottom:10;transform:translateX(-50%);'>Play Move</button>
+</form>
+
+<form method="post">
+    <button type="submit" name="ready" id='readyButton' style='position:fixed;left:10;bottom:10;'>Ready</button>
 </form>
 
 <script>
+    function updatebuttonname()
+    {
+        const playmovebutton = document.getElementById('playMoveButton');
 
+        if (wisselen) playmovebutton.innerHTML = "Switch Cards";
+        else if (pakken) playmovebutton.innerHTML = "Take Card";
+        else playmovebutton.innerHTML = "Play Move";
+    }
+    
     function moveto(object, start,end)
     {
         object.style.transform = "translate(-50%,-50%)";
@@ -54,8 +58,6 @@ session_start();
         const input = document.getElementById('input');
         const card = document.getElementById(text);
 
-        //console.log(card);
-       // console.log("e");
         function getkaartfromid(kaartid) {
             if (kaartid > 51) return 13;
             else return kaartid % 13;
@@ -64,7 +66,7 @@ session_start();
         try {
             let array = JSON.parse(input.value);
             
-            if (pakken == kaartVoor && ((pakken && !array.includes(text)) || (!pakken && !array.includes(text) && (array.length == 0 || (array.length > 0 && getkaartfromid(array[0]) == getkaartfromid(text)))))) {
+            if ((wisselen && !array.includes(text) && array.length < 2) || (pakken == kaartVoor && ((pakken && !array.includes(text)) || (!pakken && !array.includes(text) && (array.length == 0 || (array.length > 0 && getkaartfromid(array[0]) == getkaartfromid(text))))))) {
                 array.push(text);
                 input.value = JSON.stringify(array);
                 card.style.transform += "translateY(-5px)";
@@ -77,6 +79,10 @@ session_start();
         } catch (e) {
             console.error(e);
         }
+    }
+    
+    function removereadybutton() {
+        document.getElementById('readyButton').remove();
     }
 </script>
 
@@ -111,7 +117,7 @@ if ($game->num_rows == 0)
 $game = $game->fetch_assoc();
 
 
-$you = $conn->query("SELECT hand, nummer, kaartenvooropen, kaartenvoorgesloten FROM players WHERE id = '".$_SESSION['id']."'")->fetch_assoc();
+$you = $conn->query("SELECT hand, nummer, kaartenvooropen, kaartenvoorgesloten FROM players WHERE id = '$playerid'")->fetch_assoc();
 
 $kaarten = $you['hand'];
 $kaartenvooropen = json_decode($you['kaartenvooropen']);
@@ -120,18 +126,32 @@ $yournummer = $you['nummer'];
 
 $cardsize = 65;
 
+$started = true;
+$playersready = $conn->query("SELECT ready FROM players WHERE serverid = '$gameid'");
+while ($row = $playersready->fetch_assoc()) {
+    if (!$row['ready']) {
+        $started = false;
+        echo "<script>wisselen=true;</script>";
+        break;
+    }
+}
+
+if ($started) echo "<script>wisselen=false;</script>";
+
+if ($conn->query("SELECT ready FROM players WHERE id = '$playerid'")->fetch_assoc()['ready']) echo "<script>removereadybutton();</script>";
 
 //echo "jouw kaarten: <br>".$kaarten."<br>";
 $kaarten = json_decode($kaarten);
 
 
 if (count($kaarten) >= 3)  {
-    echo "<script>pakken=false</script>";
+    echo "<script>pakken=false;</script>";
 }
 else {
-    echo "<script>pakken=true</script>";
+    echo "<script>pakken=true;</script>";
 }
 
+echo "<script>updatebuttonname();</script>";
 
 function drawHand($kaarten, $hand, $height, $gesloten, $layer, $kaartvoor)
 {
@@ -285,8 +305,10 @@ $result = $conn->query($sql)->fetch_assoc();
 
 $turnName = $result['username'];
 
-
-if ($game['winner'] == null) {
+if (!$started) {
+    echo "<br>Wachten tot iedereen klaar is...<br>Wissel je kaarten";
+}
+else if ($game['winner'] == null) {
     if (strcasecmp($turnName, $_SESSION['username']) == 0) {
         echo "<br>Jij bent aan de beurt";
         if (count($kaarten) >= 3 || count($kaartenvoorgesloten) == 0) {echo "<br>Leg kaart neer";}
@@ -462,6 +484,7 @@ function playmove(array $move) {
     global $yournummer;
     global $kaartenvooropen;
     global $kaartenvoorgesloten;
+    global $playerid;
 
  
     if ($yournummer == $turn) {
@@ -495,7 +518,7 @@ function playmove(array $move) {
         
         $conn->query("UPDATE games SET stapel = '" . json_encode($stapel) . "' WHERE id = '$gameid'");
         $conn->query("UPDATE games SET pakstapel = '" . json_encode($pakstapel) . "' WHERE id = '$gameid'");
-        $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '".$_SESSION['id']."'");
+        $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
 
         if (count($kaarten) < 3){
             if (count($kaartenvooropen) > 0){
@@ -508,8 +531,8 @@ function playmove(array $move) {
                     if (count($kaartenvoorgesloten) > 0) $kaarten[] = array_shift($kaartenvoorgesloten);
                 }
 
-                $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '".$_SESSION['id']."'");
-                $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE id = '".$_SESSION['id']."'");
+                $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
+                $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE id = '$playerid'");
 
                 goNextTurn($kaarten);
             }
@@ -613,6 +636,7 @@ function pakKaartenVoor(array $input) {
     global $kaartenvoorgesloten;
     global $kaarten;
     global $conn;
+    global $playerid;
     
     foreach ($input as $kaart) {
         if (in_array($kaart, $kaartenvooropen) && count($kaarten) < 3) {
@@ -626,8 +650,8 @@ function pakKaartenVoor(array $input) {
         }
     }
 
-    $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '".$_SESSION['id']."'");
-    $conn->query("UPDATE players SET kaartenvooropen = '" . json_encode($kaartenvooropen) . "' WHERE id = '".$_SESSION['id']."'");
+    $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
+    $conn->query("UPDATE players SET kaartenvooropen = '" . json_encode($kaartenvooropen) . "' WHERE id = '$playerid'");
 
     if (count($kaarten) >= 3) goNextTurn($kaarten);
     else if (count($kaartenvooropen) == 0) {
@@ -635,8 +659,8 @@ function pakKaartenVoor(array $input) {
             if (count($kaartenvoorgesloten) > 0) $kaarten[] = array_shift($kaartenvoorgesloten);
         }
 
-        $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '".$_SESSION['id']."'");
-        $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE id = '".$_SESSION['id']."'");
+        $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
+        $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE id = '$playerid'");
 
         goNextTurn($kaarten);
     }
@@ -651,21 +675,57 @@ if ($result->num_rows > 0) {
 }
     
 
-if ($turn >= $lowestbotnumber && $game['winner'] == null) {
+if ($turn >= $lowestbotnumber && $game['winner'] == null && $started) {
     //usleep(1000000);
     botMove();
 }
 
-
-
 if (isset($_POST['playMove']) && $game['winner'] == null) {
-    $value = $_POST['move'];
-    if (count($kaarten) >= 3 || count($kaartenvoorgesloten) == 0)  {
-        playmove(json_decode($value));
+    $value = json_decode($_POST['move']);
+    if ((count($kaarten) >= 3 || count($kaartenvoorgesloten) == 0) && $started)  {
+        playmove($value);
+    }
+    else if (!$started) {
+        if (count($value) == 2) {
+            if (in_array($value[0], $kaarten) && in_array($value[1], $kaartenvooropen)){
+                $kaarthand = $value[0];
+                $kaartvoor = $value[1];
+                $validinput = true;
+            }
+            else if (in_array($value[1], $kaarten) && in_array($value[0], $kaartenvooropen)){
+                $kaarthand = $value[1];
+                $kaartvoor = $value[0];
+                $validinput = true;
+            }
+            else $validinput = false;
+
+            if ($validinput) {
+                array_splice($kaarten, array_search($kaarthand, $kaarten), 1);
+                array_splice($kaartenvooropen, array_search($kaartvoor, $kaartenvooropen), 1);
+
+                $kaarten[] = $kaartvoor;
+                $kaartenvooropen[] = $kaarthand;
+
+                $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
+                $conn->query("UPDATE players SET kaartenvooropen = '" . json_encode($kaartenvooropen) . "' WHERE id = '$playerid'");
+
+                header("Refresh:0");
+                ob_end_flush();
+                exit();
+            }
+            else echo "<br>Die kaarten kan je niet wisselen";
+        }
     }
     else {
-        pakKaartenVoor(json_decode($value));
+        pakKaartenVoor($value);
     }
+}
+
+if (isset($_POST['ready'])){
+    $conn->query("UPDATE players SET ready = 1 WHERE id = '$playerid'");
+    header("Refresh:0");
+    ob_end_flush();
+    exit();
 }
 ?>
 </body>

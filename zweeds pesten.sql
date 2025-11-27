@@ -25,7 +25,8 @@ CREATE TABLE `Players` (
   `kaartenvooropen` text,
   `kaartenvoorgesloten` text,
   `serverid` VARCHAR(36),
-  `nummer` integer
+  `nummer` integer,
+  `ready` tinyint
 );
 
 CREATE TABLE `Stats` (

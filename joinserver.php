@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 ?>
 <html>
@@ -7,15 +6,9 @@ session_start();
 <?php
 if ($_SESSION["loggedin"]  == true)
 {
- 
-    
-
-
-    // Create connection
     $conn = new mysqli("localhost", "root", "", "zweeds pesten");
-    // Check connection
     if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+        die("Connection failed: " . $conn->connect_error);
     }
 
     $gameid = $_GET['id'];
@@ -25,75 +18,25 @@ if ($_SESSION["loggedin"]  == true)
 
     if ($game->num_rows == 0) 
     {
-    
         header("Location: home.php");
         exit();
     }
     
     $sql = "SELECT COUNT(*) FROM players WHERE serverid = '$gameid'";
     $playersjoined = $conn->query($sql)->fetch_assoc()["COUNT(*)"];
-  //  print_r($playersjoined["COUNT(*)"]);//$playersjoined["num_rows"]);
-
-    //$sql = "UPDATE players SET id =". $_SESSION['id']." WHERE gameid = '".$_GET['id']."' AND id = 0 LIMIT 1";
-    $sql = "INSERT INTO players (id, user,serverid, nummer)
-    VALUES ('".$_SESSION['id']."', '".$_SESSION['id']."','$gameid'  , $playersjoined )";
+    
+    $sql = "INSERT INTO players (id, user, serverid, nummer, ready)
+    VALUES ('".$_SESSION['id']."', '".$_SESSION['id']."', '$gameid', $playersjoined, 0)";
     $result = $conn->query($sql);
     header("Location: lobby.php?id=".$_GET['id']);
     exit();
 
-    /*
-    $player1 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player1 FROM servers WHERE id = '".$_GET["id"]."')")->fetch_assoc();
-    if ($player1 == null) {
-
-        $sql = "UPDATE servers SET player1 = '". $_SESSION['id']."' WHERE id = '".$_GET['id']."'";
-
-        $result = $conn->query($sql);
-  
-        header("Location: lobby.php?id=".$_GET['id']);
-        exit();
-
-    }
-    else {
-
-        $player2 = $conn->query("SELECT * FROM users WHERE id IN (SELECT player2 FROM servers WHERE id = '".$_GET["id"]."')")->fetch_assoc();
-        if ($player2 == null) {
-
-            $sql = "UPDATE servers SET player2 = '". $_SESSION['id']."' WHERE id = '".$_GET['id']."'";
-           
-            $result = $conn->query($sql);
-
-        
-            header("Location: lobby.php?id=".$_GET['id']);
-            exit();
-
-        }
-    
-    }*/
-
-
-
-
-    
-
-
-
-
-    
     $conn->close();
-    
-
-
-
-
-
-
 }
 else {
     header("Location: inlog.php");
     exit();
 }
-
-
 ?>
 </body>
 </html>

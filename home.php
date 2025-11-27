@@ -16,8 +16,12 @@ if ($_SESSION["loggedin"] == true)
     }
 
     $id = $_SESSION["id"];
+    $result = $conn->query("SELECT * FROM stats WHERE id = $id")->fetch_assoc();
 
-    echo "welkom". $_SESSION['username']."<a href='createserver.php'>create server</a><br><a href='findserver.php'>join server</a>";
+
+    echo "welkom". $_SESSION['username']." je elo is ".$result['elo']."<a href='createserver.php'>create server</a><br>
+    <a href='findserver.php'>join server</a><br>
+    <a href='search.php'>stats</a>";
 
     $conn->close();
 

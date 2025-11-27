@@ -26,6 +26,7 @@ if ($result->num_rows > 0 && $username != 'bot') {
     {
         echo "succes login";
 
+        /*
         $id = rand();
         $usersWithId = $conn->query("SELECT * FROM users WHERE id = '$id'");
         while ($usersWithId->num_rows > 0) {
@@ -34,9 +35,9 @@ if ($result->num_rows > 0 && $username != 'bot') {
         }
 
         $conn->query("UPDATE users SET id = '$id' WHERE username = '$username'");
-
+        */
         $_SESSION['loggedin'] = true;
-        $_SESSION['id'] = $id;
+        $_SESSION['id'] = $row['id'];
         $_SESSION['username'] = $username;
         header("Location: home.php");
         exit();

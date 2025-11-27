@@ -227,6 +227,7 @@ if ($enemykaarten == $kaarten)
 }
 
 
+
 drawHand($enemykaarten, 1, 50, true, 0, "false");
 drawHand(json_decode($row['kaartenvoorgesloten']), 1, 160, true, 0, "false");
 drawHand(json_decode($row['kaartenvooropen']), 1, 160, false, 5, "false");
@@ -419,7 +420,30 @@ function goNextTurn(array $kaarten) {
 
     $nextplayer = ($turn+1)%4;
 
-    if (count($kaarten) == 0) $conn->query("UPDATE games SET winner = $turn WHERE id = '$gameid'");
+    if (count($kaarten) == 0) {
+        $conn->query("UPDATE games SET winner = $turn WHERE id = '$gameid'"); 
+
+        $sql = "SELECT user FROM players WHERE serverid = '$gameid'";
+        $result = $conn->query($sql);
+
+        $row = $result->fetch_assoc();
+        $player1 = $row['user'];
+        $row = $result->fetch_assoc();
+        $player2 = $row['user'];
+        $row = $result->fetch_assoc();
+        $player3 = $row['user'];
+        $row = $result->fetch_assoc();
+        $player4 = $row['user'];
+
+        $sql = "SELECT user FROM players WHERE serverid = '$gameid' AND nummer=$turn";
+        $result = $conn->query($sql)->fetch_assoc();
+
+
+        $conn->query("INSERT INTO gameslog (winner, player1, player2, player3, player4)
+        VALUES ('".$result['user']."', '$player1', '$player2', '$player3', '$player4')");
+        
+    }
+
     else $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");
 
     header("Refresh:0");

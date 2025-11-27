@@ -23,7 +23,10 @@ else {
         $usersWithId = $conn->query("SELECT * FROM users WHERE id = '$id'");
     }
     $conn->query("INSERT INTO users (id, username, password) VALUES ('$id', '$username', '$password')");
+    $conn->query("INSERT INTO stats (id, user, wins, gamesplayed, elo) VALUES ('$id', '$id', 0, 0, 1000)");
     echo "account created";
+
+
 
     $_SESSION['loggedin'] = true;
     $_SESSION['id'] = $id;

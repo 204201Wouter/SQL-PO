@@ -38,7 +38,7 @@ CREATE TABLE `Stats` (
 );
 
 CREATE TABLE `Gameslog` (
-  `id` integer PRIMARY KEY AUTOINCREMENT,
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
   `winner` integer,
   `player1` integer,
   `player2` integer,

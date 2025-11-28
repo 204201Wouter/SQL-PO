@@ -144,7 +144,7 @@ if ($conn->query("SELECT ready FROM players WHERE id = '$playerid'")->fetch_asso
 $kaarten = json_decode($kaarten);
 
 
-if (count($kaarten) >= 3)  {
+if (count($kaarten) >= 3 || count($kaartenvoorgesloten) == 0)  {
     echo "<script>pakken=false;</script>";
 }
 else {
@@ -314,8 +314,8 @@ else if ($game['winner'] == null) {
         if (count($kaarten) >= 3 || count($kaartenvoorgesloten) == 0) {echo "<br>Leg kaart neer";}
         else {echo "<br>Pak kaart(en)";}
     }
-    else echo "<br>$turnName is aan de beurt";
-   // else echo "<br>$turnName is aan de beurt<meta http-equiv='refresh' content='2'>";
+    //else echo "<br>$turnName is aan de beurt";
+    else echo "<br>$turnName is aan de beurt<meta http-equiv='refresh' content='2'>";
 }
 else {
     if (strcasecmp($turnName, $_SESSION['username']) == 0) echo "Jij hebt gewonnen";

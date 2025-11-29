@@ -27,9 +27,10 @@ session_start();
 
 <body style="background-color:#008531;">
 <form method="post">
-    <input type="text" name="move" placeholder="move" id="input" value="[]" style="display:block;">
+    <input type="text" name="move" placeholder="move" id="input" value="[]" style="display:none;">
     <button type="submit" name="playMove" id="playMoveButton" style='position:fixed;left:50%;bottom:10;transform:translateX(-50%);'>Play Move</button>
 </form>
+<a href="home.php">home</a>
 
 <form method="post">
     <button type="submit" name="ready" id='readyButton' style='position:fixed;left:10;bottom:10;'>Ready</button>
@@ -138,7 +139,8 @@ while ($row = $playersready->fetch_assoc()) {
 
 if ($started) echo "<script>wisselen=false;</script>";
 
-if ($conn->query("SELECT ready FROM players WHERE id = '$playerid'")->fetch_assoc()['ready']) echo "<script>removereadybutton();</script>";
+$ready = $conn->query("SELECT ready FROM players WHERE id = '$playerid'")->fetch_assoc()['ready'];
+if ($ready) echo "<script>removereadybutton();</script>";
 
 //echo "jouw kaarten: <br>".$kaarten."<br>";
 $kaarten = json_decode($kaarten);
@@ -306,7 +308,9 @@ $result = $conn->query($sql)->fetch_assoc();
 $turnName = $result['username'];
 
 if (!$started) {
+   // if ($ready) echo "<meta http-equiv='refresh' content='2'>";
     echo "<br>Wachten tot iedereen klaar is...<br>Wissel je kaarten";
+    
 }
 else if ($game['winner'] == null) {
     if (strcasecmp($turnName, $_SESSION['username']) == 0) {
@@ -315,7 +319,7 @@ else if ($game['winner'] == null) {
         else {echo "<br>Pak kaart(en)";}
     }
     //else echo "<br>$turnName is aan de beurt";
-    else echo "<br>$turnName is aan de beurt<meta http-equiv='refresh' content='2'>";
+    else echo "<br>$turnName is aan de beurt";//<meta http-equiv='refresh' content='2'>";
 }
 else {
     if (strcasecmp($turnName, $_SESSION['username']) == 0) echo "Jij hebt gewonnen";
@@ -435,27 +439,155 @@ function refillCards(bool $forPlayer) {
     else $kaarten = $localkaarten;
 }
 
-function goNextTurn(array $kaarten) {
+function updatestats(array $player)
+{
+
+    global $turn;
+
+    $sql = "SELECT * FROM stats WHERE id = $player[0]";
+    $result = $conn->query($sql)->fetch_assoc();
+
+
+    $wins = $result["wins"];
+    $played = $result["gamesplayed"];
+
+    $played += 1;
+    if ($player[0] == $turn) $wins += 1;
+
+    $elo = $player[1];
+
+    $result = $conn->query("UPDATE stats SET elo = $elo WHERE id = $player[0]");
+    $result = $conn->query("UPDATE stats SET wins = $wins WHERE id = $player[0]");
+    $result = $conn->query("UPDATE stats SET gamesplayed = $played WHERE id = $player[0]");
+
+
+
+    // E=1+10(Ropp​−Rplayer​)/4001​
+    //S=points earned
+    //R′=R+K(S−Etotal​)
+
+
+    // RA′​=RA​+Kall opponents B∑​(SA,B​−EA,B​)
+
+    // k = 20
+
+    /*  E = 1/ (1+pow(10,((elo opp - elo player) /400))  for all players
+
+    s = 1 0.5 or 0 
+
+    delta = s-E all players
+
+
+    Elo += 20*delta
+    
+    */
+
+}
+
+function goNextTurn(bool $win) {
     global $turn;
     global $gameid;
     global $conn;
 
+
     $nextplayer = ($turn+1)%4;
 
-    if (count($kaarten) == 0) {
+    if ($win)  {
         $conn->query("UPDATE games SET winner = $turn WHERE id = '$gameid'"); 
 
-        $sql = "SELECT user FROM players WHERE serverid = '$gameid'";
+        $sql = "SELECT user, hand, kaartenvooropen, kaartenvoorgesloten FROM players WHERE serverid = '$gameid'";
         $result = $conn->query($sql);
+
+
+   
 
         $row = $result->fetch_assoc();
         $player1 = $row['user'];
+        $hand = count(json_decode($row["hand"]));
+        $open = count(json_decode($row["kaartenvooropen"]));
+        $gesloten = count(json_decode($row["kaartenvoorgesloten"]));
+        $player1cards = $hand + $open + $gesloten;
+
         $row = $result->fetch_assoc();
         $player2 = $row['user'];
+        $hand = count(json_decode($row["hand"]));
+        $open = count(json_decode($row["kaartenvooropen"]));
+        $gesloten = count(json_decode($row["kaartenvoorgesloten"]));
+        $player2cards = $hand + $open + $gesloten;
+
         $row = $result->fetch_assoc();
         $player3 = $row['user'];
+        $hand = count(json_decode($row["hand"]));
+        $open = count(json_decode($row["kaartenvooropen"]));
+        $gesloten = count(json_decode($row["kaartenvoorgesloten"]));
+        $player3cards = $hand + $open + $gesloten;
+
         $row = $result->fetch_assoc();
         $player4 = $row['user'];
+        $hand = count(json_decode($row["hand"]));
+        $open = count(json_decode($row["kaartenvooropen"]));
+        $gesloten = count(json_decode($row["kaartenvoorgesloten"]));
+        $player4cards = $hand + $open + $gesloten;
+
+        
+        echo $player1;
+        print_r($conn->query("SELECT * FROM stats WHERE id = '$player1'")->fetch_assoc());
+
+        $player1elo = $conn->query("SELECT * FROM stats WHERE id = '$player1'")->fetch_assoc()["elo"];  
+        $player2elo = $conn->query("SELECT * FROM stats WHERE id = '$player2'")->fetch_assoc()["elo"];
+        $player3elo = $conn->query("SELECT * FROM stats WHERE id = '$player3'")->fetch_assoc()["elo"];
+        $player4elo = $conn->query("SELECT * FROM stats WHERE id = '$player4'")->fetch_assoc()["elo"];
+
+
+
+
+     $players = [[$player1, $player1elo, $player1cards, 0], [$player2, $player2elo, $player2cards, 0], [$player3, $player3elo, $player3cards, 0], [$player4, $player4elo, $player4cards, 0]];
+
+        foreach ($players as &$player)
+        {
+          
+            foreach ($players as $opp)
+            {
+
+                if ($player !== $opp)
+                {
+                    $E = 1 / (1 + pow(10, ($opp[1] - $player[1])/400));
+                    if ($player[2] < $opp[2]) $S = 1;
+                    else if ($player[2] > $opp[2]) $S = 0;
+                    else $S = 0.5;
+
+
+                    $player[3] += 20*($S-$E);
+                }
+       
+                
+
+            }   
+            
+            
+            
+
+        }
+
+        foreach ($players as &$player)
+        {
+          
+        $player[1] += $player[3];
+
+        updatestats($player);
+
+        }
+
+
+        print_r($players);
+
+
+
+
+
+
+
+
 
         $sql = "SELECT user FROM players WHERE serverid = '$gameid' AND nummer=$turn";
         $result = $conn->query($sql)->fetch_assoc();
@@ -463,6 +595,11 @@ function goNextTurn(array $kaarten) {
 
         $conn->query("INSERT INTO gameslog (winner, player1, player2, player3, player4)
         VALUES ('".$result['user']."', '$player1', '$player2', '$player3', '$player4')");
+
+
+
+
+    
         
     }
 
@@ -534,11 +671,11 @@ function playmove(array $move) {
                 $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
                 $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE id = '$playerid'");
 
-                goNextTurn($kaarten);
+                goNextTurn((count($kaarten)+count($kaartenvoorgesloten)) == 0);
             }
-            else goNextTurn($kaarten);
+            else goNextTurn((count($kaarten)+count($kaartenvoorgesloten)) == 0);
         }
-        else goNextTurn($kaarten);
+        else goNextTurn((count($kaarten)+count($kaartenvoorgesloten)) == 0);
     }
 }
 
@@ -628,7 +765,7 @@ function botMove() {
     $conn->query("UPDATE players SET kaartenvooropen = '" . json_encode($botkaartenvooropen) . "' WHERE nummer = '$turn' AND serverid = '$gameid'");
     $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($botkaartenvoorgesloten) . "' WHERE nummer = '$turn' AND serverid = '$gameid'");
 
-    goNextTurn($botkaarten);
+    goNextTurn((count($botkaarten)+count($botkaartenvoorgesloten)) == 0);
 }
 
 function pakKaartenVoor(array $input) {
@@ -653,7 +790,7 @@ function pakKaartenVoor(array $input) {
     $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
     $conn->query("UPDATE players SET kaartenvooropen = '" . json_encode($kaartenvooropen) . "' WHERE id = '$playerid'");
 
-    if (count($kaarten) >= 3) goNextTurn($kaarten);
+    if (count($kaarten) >= 3) goNextTurn((count($kaarten)+count($kaartenvoorgesloten)) == 0);
     else if (count($kaartenvooropen) == 0) {
         for ($i = 0; $i < 3 - count($kaarten); $i++) {
             if (count($kaartenvoorgesloten) > 0) $kaarten[] = array_shift($kaartenvoorgesloten);
@@ -662,7 +799,7 @@ function pakKaartenVoor(array $input) {
         $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
         $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE id = '$playerid'");
 
-        goNextTurn($kaarten);
+        goNextTurn((count($kaarten)+count($kaartenvoorgesloten)) == 0);
     }
 }
 

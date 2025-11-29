@@ -4,6 +4,18 @@ session_start();
 $username = htmlspecialchars($_POST["username"]);
 $password = htmlspecialchars($_POST["password"]);
 
+
+if (strlen($username) < 3) {
+    header("Location: newaccount.php?account=short");
+    exit();}
+if (strlen($username) > 10) {
+    header("Location: newaccount.php?account=long");
+    exit();}
+
+
+
+
+
 $conn = new mysqli("localhost", "root", "", "zweeds pesten");
 
 if ($conn->connect_error) {
@@ -13,7 +25,9 @@ if ($conn->connect_error) {
 $usersWithUsername = $conn->query("SELECT * FROM users WHERE username = '$username'");
 
 if ($usersWithUsername->num_rows > 0) {
-    echo "username already taken";
+    header("Location: newaccount.php?account=taken");
+    exit();
+
 }
 else {
     $id = rand();

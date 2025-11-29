@@ -19,9 +19,9 @@ if ($_SESSION["loggedin"] == true)
     $result = $conn->query("SELECT * FROM stats WHERE id = $id")->fetch_assoc();
 
 
-    echo "welkom". $_SESSION['username']." je elo is ".$result['elo']."<a href='createserver.php'>create server</a><br>
+    echo "<div  style='text-align:center;'><h1>welkom ". $_SESSION['username']."!</h1> je elo is ".$result['elo']."<br><a href='createserver.php'>create server</a><br>
     <a href='findserver.php'>join server</a><br>
-    <a href='search.php'>stats</a>";
+    <a href='search.php'>stats</a><div>";
 
     $conn->close();
 
@@ -35,7 +35,10 @@ if ($_SESSION["loggedin"] == true)
 
     if(array_key_exists('logout', $_POST)) {
         session_destroy(); 
+        header("Location: inlog.php");
+        exit();
     }
+ 
 }
 else {
     header("Location: inlog.php");

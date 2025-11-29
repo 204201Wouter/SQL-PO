@@ -3,17 +3,27 @@ session_start();
 ?>
 
 <html>
-<body>
+<body style="text-align:center;">
+
+
+<table border="1"  style="margin:auto;">
 
 <form method="GET" action="search.php">
     <label for="username">Username:</label><br>
     <input type="text" id="username" name="username"><br>
 
-    <input type="submit" value="search">
-    <input type="submit" name="sortbyusername" value="username">
-    <input type="submit" name="sortbyelo" value="elo">
+    
+    <input type="submit" value="search"> <br><br>
+    <tr>
+    <th><input type="submit" name="sortbyusername" value="username"></th>
+    <th><input type="submit" name="sortbyelo" value="elo"></th>
+
+    </tr>
+    
+
 
 </form>
+
 
 
 
@@ -52,7 +62,11 @@ if ($_SESSION["loggedin"] == true)
 
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            echo $row["username"]."  ".$row["elo"]." <a href='profile.php?username=".$row["username"]."'>visit profile</a> <br>";
+            echo "<tr>";
+            echo "<td>" . htmlspecialchars($row['username']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['elo']) . "</td>";
+            echo "<td><a href='profile.php?username=" . urlencode($row['username']) . "'>Visit Profile</a></td>";
+            echo "</tr>";
         }
     }
 
@@ -68,6 +82,10 @@ else {
     exit();
 }
 ?>
+
+
+</table>
+
 
 </body>
 </html>

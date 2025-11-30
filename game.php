@@ -453,7 +453,7 @@ function updatestats(array $player)
     $played += 1;
     if ($player[0] == $turn) $wins += 1;
 
-    $elo = $player[1];
+    $elo = $player[1]+$player[3];
 
     $result = $conn->query("UPDATE stats SET elo = $elo WHERE id = ".$player[0]);
     $result = $conn->query("UPDATE stats SET wins = $wins WHERE id = ".$player[0]);
@@ -507,6 +507,7 @@ function goNextTurn(bool $win) {
 
                 $players[] = [$player, $elo, $playercards, 0];
             }
+            
         }
 
         foreach ($players as &$player)
@@ -528,7 +529,7 @@ function goNextTurn(bool $win) {
 
         foreach ($players as &$player)
         {
-            $player[1] += $player[3];
+     
 
             updatestats($player);
         }
@@ -536,10 +537,22 @@ function goNextTurn(bool $win) {
         $sql = "SELECT user FROM players WHERE serverid = '$gameid' AND nummer = $turn";
         $result = $conn->query($sql)->fetch_assoc();
 
-        while (count($players) < 4) $players[] = [-1];
+        while (count($players) < 4) $players[] = [-1, 1000, 0, 0];
 
-        $conn->query("INSERT INTO gameslog (winner, player1, player2, player3, player4)
-        VALUES ('".$result['user']."', '".$players[0][0]."', '".$players[1][0]."', '".$players[2][0]."', '".$players[3][0]."')");        
+        
+        
+
+        $conn->query("INSERT INTO gameslog (
+        player1, player1elo, player1elodiff, 
+        player2, player2elo, player2elodiff, 
+        player3, player3elo, player3elodiff, 
+        player4, player4elo, player4elodiff, date)
+        VALUES ('".$players[0][0]."', '".$players[0][1]."', '".$players[0][3]."',
+         '".$players[1][0]."', '".$players[1][1]."', '".$players[1][3]."',
+          '".$players[2][0]."', '".$players[2][1]."', '".$players[2][3]."',
+           '".$players[3][0]."', '".$players[3][1]."', '".$players[3][3]."',
+           NOW()
+           )");        
     }
 
     else $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");

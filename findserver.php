@@ -2,7 +2,7 @@
 session_start();
 ?>
 <html>
-    <body>
+    <body  style="text-align:center;">
 <?php
 if ($_SESSION["loggedin"]  == true)
 {
@@ -17,7 +17,7 @@ if ($_SESSION["loggedin"]  == true)
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            echo $row['id']."<a href="."joinserver.php?id=".$row['id'].">join</a><br>";
+            echo $row['id']." <a href="."joinserver.php?id=".$row['id'].">join</a><br>";
         }
     }
     else {
@@ -31,5 +31,7 @@ else {
     exit();
 }
 ?>
+
+<a href="home.php">home</a>
 </body>
 </html>

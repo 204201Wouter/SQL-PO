@@ -3,7 +3,7 @@ session_start();
 ?>
 <meta http-equiv="refresh" content="2">
 <html>
-    <body>
+    <body  style="text-align:center;">
         <form method="post">
             <button type="submit" name="startServer">Start server</button>
         </form>
@@ -111,5 +111,6 @@ if (isset($_POST['startServer'])) {
     startServer();
 }
 ?>
+<a href="home.php">home</a>
 </body>
 </html>

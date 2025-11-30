@@ -66,6 +66,10 @@ else {
 }
 ?>
 
+
+
 </table>
+
+<br><a href="home.php">home</a>
 </body>
 </html>

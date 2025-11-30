@@ -111,7 +111,7 @@ $game = $conn->query("SELECT * FROM games WHERE id = '$gameid'");
 
 if ($game->num_rows == 0) 
 {
-    header("Location: home.php");
+    header("Location: lobby.php?id=$gameid");
     ob_end_flush();
     exit();
 }
@@ -308,9 +308,8 @@ $result = $conn->query($sql)->fetch_assoc();
 $turnName = $result['username'];
 
 if (!$started) {
-   // if ($ready) echo "<meta http-equiv='refresh' content='2'>";
+    if ($ready) echo "<meta http-equiv='refresh' content='2'>";
     echo "<br>Wachten tot iedereen klaar is...<br>Wissel je kaarten";
-    
 }
 else if ($game['winner'] == null) {
     if (strcasecmp($turnName, $_SESSION['username']) == 0) {
@@ -318,12 +317,12 @@ else if ($game['winner'] == null) {
         if (count($kaarten) >= 3 || count($kaartenvoorgesloten) == 0) {echo "<br>Leg kaart neer";}
         else {echo "<br>Pak kaart(en)";}
     }
-    //else echo "<br>$turnName is aan de beurt";
-    else echo "<br>$turnName is aan de beurt";//<meta http-equiv='refresh' content='2'>";
+    else echo "<br>$turnName is aan de beurt<meta http-equiv='refresh' content='2'>";
 }
 else {
     if (strcasecmp($turnName, $_SESSION['username']) == 0) echo "Jij hebt gewonnen";
     else echo "$turnName heeft gewonnen";
+    echo "<form method='post'><button type='submit' name='toLobby' id='lobbyButton' style='position:fixed;right:10;top:10;'>Return to lobby</button></form>";
 }
 
 // ------ IDs KAARTEN -------
@@ -441,10 +440,10 @@ function refillCards(bool $forPlayer) {
 
 function updatestats(array $player)
 {
-
     global $turn;
+    global $conn;
 
-    $sql = "SELECT * FROM stats WHERE id = $player[0]";
+    $sql = "SELECT * FROM stats WHERE id = " . $player[0];
     $result = $conn->query($sql)->fetch_assoc();
 
 
@@ -456,32 +455,27 @@ function updatestats(array $player)
 
     $elo = $player[1];
 
-    $result = $conn->query("UPDATE stats SET elo = $elo WHERE id = $player[0]");
-    $result = $conn->query("UPDATE stats SET wins = $wins WHERE id = $player[0]");
-    $result = $conn->query("UPDATE stats SET gamesplayed = $played WHERE id = $player[0]");
+    $result = $conn->query("UPDATE stats SET elo = $elo WHERE id = ".$player[0]);
+    $result = $conn->query("UPDATE stats SET wins = $wins WHERE id = ".$player[0]);
+    $result = $conn->query("UPDATE stats SET gamesplayed = $played WHERE id = ".$player[0]);
 
+    /*
+    E=1+10(Ropp​−Rplayer​)/4001​
+    S=points earned
+    R′=R+K(S−Etotal​)
 
+    RA′​=RA​+Kall opponents B∑​(SA,B​−EA,B​)
 
-    // E=1+10(Ropp​−Rplayer​)/4001​
-    //S=points earned
-    //R′=R+K(S−Etotal​)
+    k = 20
 
-
-    // RA′​=RA​+Kall opponents B∑​(SA,B​−EA,B​)
-
-    // k = 20
-
-    /*  E = 1/ (1+pow(10,((elo opp - elo player) /400))  for all players
+    E = 1/ (1+pow(10,((elo opp - elo player) /400))  for all players
 
     s = 1 0.5 or 0 
 
     delta = s-E all players
 
-
     Elo += 20*delta
-    
     */
-
 }
 
 function goNextTurn(bool $win) {
@@ -494,113 +488,58 @@ function goNextTurn(bool $win) {
 
     if ($win)  {
         $conn->query("UPDATE games SET winner = $turn WHERE id = '$gameid'"); 
+        $conn->query("UPDATE servers SET started = 0 WHERE id = '$gameid'"); 
 
         $sql = "SELECT user, hand, kaartenvooropen, kaartenvoorgesloten FROM players WHERE serverid = '$gameid'";
         $result = $conn->query($sql);
 
+        $players = [];
 
-   
+        while ($row = $result->fetch_assoc()) {
+            $player = $row['user'];
+            if ($player != -1) {
+                $hand = count(json_decode($row["hand"]));
+                $open = count(json_decode($row["kaartenvooropen"]));
+                $gesloten = count(json_decode($row["kaartenvoorgesloten"]));
+                $playercards = $hand + $open + $gesloten;  
 
-        $row = $result->fetch_assoc();
-        $player1 = $row['user'];
-        $hand = count(json_decode($row["hand"]));
-        $open = count(json_decode($row["kaartenvooropen"]));
-        $gesloten = count(json_decode($row["kaartenvoorgesloten"]));
-        $player1cards = $hand + $open + $gesloten;
+                $elo = $conn->query("SELECT elo FROM stats WHERE id = '$player'")->fetch_assoc()['elo'];
 
-        $row = $result->fetch_assoc();
-        $player2 = $row['user'];
-        $hand = count(json_decode($row["hand"]));
-        $open = count(json_decode($row["kaartenvooropen"]));
-        $gesloten = count(json_decode($row["kaartenvoorgesloten"]));
-        $player2cards = $hand + $open + $gesloten;
-
-        $row = $result->fetch_assoc();
-        $player3 = $row['user'];
-        $hand = count(json_decode($row["hand"]));
-        $open = count(json_decode($row["kaartenvooropen"]));
-        $gesloten = count(json_decode($row["kaartenvoorgesloten"]));
-        $player3cards = $hand + $open + $gesloten;
-
-        $row = $result->fetch_assoc();
-        $player4 = $row['user'];
-        $hand = count(json_decode($row["hand"]));
-        $open = count(json_decode($row["kaartenvooropen"]));
-        $gesloten = count(json_decode($row["kaartenvoorgesloten"]));
-        $player4cards = $hand + $open + $gesloten;
-
-        
-        echo $player1;
-        print_r($conn->query("SELECT * FROM stats WHERE id = '$player1'")->fetch_assoc());
-
-        $player1elo = $conn->query("SELECT * FROM stats WHERE id = '$player1'")->fetch_assoc()["elo"];  
-        $player2elo = $conn->query("SELECT * FROM stats WHERE id = '$player2'")->fetch_assoc()["elo"];
-        $player3elo = $conn->query("SELECT * FROM stats WHERE id = '$player3'")->fetch_assoc()["elo"];
-        $player4elo = $conn->query("SELECT * FROM stats WHERE id = '$player4'")->fetch_assoc()["elo"];
-
-
-
-
-     $players = [[$player1, $player1elo, $player1cards, 0], [$player2, $player2elo, $player2cards, 0], [$player3, $player3elo, $player3cards, 0], [$player4, $player4elo, $player4cards, 0]];
+                $players[] = [$player, $elo, $playercards, 0];
+            }
+        }
 
         foreach ($players as &$player)
         {
-          
             foreach ($players as $opp)
             {
-
                 if ($player !== $opp)
                 {
                     $E = 1 / (1 + pow(10, ($opp[1] - $player[1])/400));
+
                     if ($player[2] < $opp[2]) $S = 1;
                     else if ($player[2] > $opp[2]) $S = 0;
                     else $S = 0.5;
 
-
                     $player[3] += 20*($S-$E);
                 }
-       
-                
-
             }   
-            
-            
-            
-
         }
 
         foreach ($players as &$player)
         {
-          
-        $player[1] += $player[3];
+            $player[1] += $player[3];
 
-        updatestats($player);
-
+            updatestats($player);
         }
 
-
-        print_r($players);
-
-
-
-
-
-
-
-
-
-        $sql = "SELECT user FROM players WHERE serverid = '$gameid' AND nummer=$turn";
+        $sql = "SELECT user FROM players WHERE serverid = '$gameid' AND nummer = $turn";
         $result = $conn->query($sql)->fetch_assoc();
 
+        while (count($players) < 4) $players[] = [-1];
 
         $conn->query("INSERT INTO gameslog (winner, player1, player2, player3, player4)
-        VALUES ('".$result['user']."', '$player1', '$player2', '$player3', '$player4')");
-
-
-
-
-    
-        
+        VALUES ('".$result['user']."', '".$players[0][0]."', '".$players[1][0]."', '".$players[2][0]."', '".$players[3][0]."')");        
     }
 
     else $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");
@@ -861,6 +800,16 @@ if (isset($_POST['playMove']) && $game['winner'] == null) {
 if (isset($_POST['ready'])){
     $conn->query("UPDATE players SET ready = 1 WHERE id = '$playerid'");
     header("Refresh:0");
+    ob_end_flush();
+    exit();
+}
+
+if (isset($_POST['toLobby'])) {
+    if ($_SESSION['username'] == $gameid) {
+        $conn->query("DELETE FROM players WHERE serverid = '$gameid' AND user = -1");
+        $conn->query("DELETE FROM games WHERE id = '$gameid'");
+    }
+    header("Location: lobby.php?id=$gameid");
     ob_end_flush();
     exit();
 }

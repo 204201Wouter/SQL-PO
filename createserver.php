@@ -14,66 +14,21 @@ if ($_SESSION["loggedin"]  == true)
         die("Connection failed: " . $conn->connect_error);
     }
 
-
-
     $sql = "SELECT * FROM servers WHERE id = '".$_SESSION['username']."'";
     $result = $conn->query($sql);
     if ($result->num_rows == 0) {
-
-        /*
-        $cards = [];
-        for ($i = 0; $i<54;$i++)
-        {
-            $cards[] = $i;
-        }
-
-        shuffle($cards);
-
-        for ($i = 0; $i < 3; $i++) {
-            $player1hand[] = array_shift($cards);
-            $player2hand[] = array_shift($cards);
-            $player3hand[] = array_shift($cards);
-            $player4hand[] = array_shift($cards);
-        }
-        */
-
-
         $sql = "INSERT INTO servers (id, started)
         VALUES ('".$_SESSION['username']."', 0)";
         $result = $conn->query($sql);
 
-        
-        /*
-        $sql = "INSERT INTO players (hand, gameid)
-        VALUES ('".json_encode($player1hand)."','".$_SESSION['username']."')";
-        $result = $conn->query($sql);
-        $sql = "INSERT INTO players (hand, gameid)
-        VALUES ('".json_encode($player2hand)."','".$_SESSION['username']."')";
-        $result = $conn->query($sql);
-        $sql = "INSERT INTO players (hand, gameid)
-        VALUES ('".json_encode($player3hand)."','".$_SESSION['username']."')";
-        $result = $conn->query($sql);
-        $sql = "INSERT INTO players (hand, gameid)
-        VALUES ('".json_encode($player4hand)."','".$_SESSION['username']."')";
-        $result = $conn->query($sql);
-        */
-
-
         header("Location: joinserver.php?id=".$_SESSION['username']);
         exit();
-
-
     }
 
     header("Location: lobby.php?id=".$_SESSION['username']);
     exit();
 
-
-
-
     $conn->close();
-    
-
 }
 else {
     header("Location: inlog.php");

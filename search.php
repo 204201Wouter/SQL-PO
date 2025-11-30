@@ -5,32 +5,20 @@ session_start();
 <html>
 <body style="text-align:center;">
 
-
-<table border="1"  style="margin:auto;">
+<table style="margin:auto; border: 1;">
 
 <form method="GET" action="search.php">
     <label for="username">Username:</label><br>
     <input type="text" id="username" name="username"><br>
-
-    
     <input type="submit" value="search"> <br><br>
+
     <tr>
-    <th><input type="submit" name="sortbyusername" value="username"></th>
-    <th><input type="submit" name="sortbyelo" value="elo"></th>
-
+        <th><input type="submit" name="sortbyusername" value="username"></th>
+        <th><input type="submit" name="sortbyelo" value="elo"></th>
     </tr>
-    
-
-
 </form>
 
-
-
-
-
 <?php
-
-
 if ($_SESSION["loggedin"] == true)
 {
     $conn = new mysqli("localhost", "root", "", "zweeds pesten");
@@ -70,12 +58,7 @@ if ($_SESSION["loggedin"] == true)
         }
     }
 
-  
-
-
-
     $conn->close();
-
 }
 else {
     header("Location: inlog.php");
@@ -83,9 +66,6 @@ else {
 }
 ?>
 
-
 </table>
-
-
 </body>
 </html>

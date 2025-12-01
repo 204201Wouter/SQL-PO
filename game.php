@@ -539,20 +539,15 @@ function goNextTurn(bool $win) {
 
         while (count($players) < 4) $players[] = [-1, 1000, 0, 0];
 
-        
-        
-        $conn->query("INSERT INTO gameslog (
-           NOW()
-           )");        
-           
-
+        $loggedgamesamount = $conn->query("SELECT COUNT(*) FROM gameslog")->fetch_assoc()['COUNT(*)'];
+        $conn->query("INSERT INTO gameslog (id, date) VALUES ($loggedgamesamount, NOW())");
 
         $conn->query("INSERT INTO playerlog (
         gameid,
         playerid,
         elo,
         elodiff)
-        VALUES ('".$players[0][0]."', '".$players[0][1]."', '".$players[0][3]."')");        
+        VALUES ($loggedgamesamount, '".$players[0][0]."', '".$players[0][1]."', '".$players[0][3]."')");        
     }
 
     else $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");

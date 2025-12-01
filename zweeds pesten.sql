@@ -38,17 +38,16 @@ CREATE TABLE `Stats` (
 );
 
 CREATE TABLE `Gameslog` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT, 
+  `id` integer PRIMARY KEY, 
   `date` TEXT
 );
 
 CREATE TABLE `Playerlog` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
+  `id` integer PRIMARY KEY AUTO_INCREMENT, 
   `gameid` integer,
   `playerid` integer,
   `elo` integer,
   `elodiff` integer
-
 );
 
 ALTER TABLE `Servers` ADD FOREIGN KEY (`gameid`) REFERENCES `Games` (`id`);
@@ -58,7 +57,6 @@ ALTER TABLE `Players` ADD FOREIGN KEY (`user`) REFERENCES `Users` (`id`);
 ALTER TABLE `Players` ADD FOREIGN KEY (`serverid`) REFERENCES `Servers` (`id`);
 
 ALTER TABLE `Stats` ADD FOREIGN KEY (`user`) REFERENCES `Users` (`id`);
-
 
 ALTER TABLE `Playerlog` ADD FOREIGN KEY (`gameid`) REFERENCES `Gameslog` (`id`);
 ALTER TABLE `Playerlog` ADD FOREIGN KEY (`playerid`) REFERENCES `Users` (`id`);

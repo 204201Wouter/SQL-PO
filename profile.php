@@ -32,8 +32,9 @@ if ($_SESSION["loggedin"] == true)
     echo "losses: ".$result["gamesplayed"]+$result["wins"]."<br>";
     echo "games played: ".$result["gamesplayed"]."<br><br>";
 
-    $sql = "SELECT * FROM gameslog WHERE player1 = $id OR player2 = $id OR player3 = $id OR player4 = $id ORDER BY id DESC";
 
+
+    $sql = "SELECT gameid FROM playerlog WHERE playerid = $id";
 
     $result = $conn->query($sql);
 
@@ -48,21 +49,26 @@ if ($_SESSION["loggedin"] == true)
             $name = $conn->query("SELECT * FROM users where id = '$player'")->fetch_assoc()["username"];
         }
 
-         echo "<td>".$name."</td><td>".$elo."</td><td>".$elodiff."</td>";
-
-
+        echo "<td>".$name."</td><td>".$elo."</td><td>".$elodiff."</td>";
     }
+
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             echo "<tr>";
-            player($row["player1"],$row["player1elo"],$row["player1elodiff"]);
-            player($row["player2"],$row["player2elo"],$row["player2elodiff"]);
-            player($row["player3"],$row["player3elo"],$row["player3elodiff"]);
-            player($row["player4"],$row["player4elo"],$row["player4elodiff"]);
-            echo "<td>".$row["date"]."</td>";
-            echo "</tr>";
-         
+            $players = $conn->query("SELECT * FROM playerlog WHERE gameid = " . $row['gameid']);
+            $bots = 4;
+            while ($player = $players->fetch_assoc()) {
+                player($player["playerid"], $player["elo"], $player["elodiff"]);
+                $bots--;
+            }
 
+            for ($i = 0; $i < $bots; $i++) {
+                player(-1, 1000, 0);
+            }
+
+            $date = $conn->query("SELECT date FROM gameslog WHERE id = " . $row['gameid'])->fetch_assoc()['date'];
+            echo "<td>$date</td>";
+            echo "</tr>";
         }
     }
     echo "</table>";

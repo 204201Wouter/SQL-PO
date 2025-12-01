@@ -63,3 +63,4 @@ ALTER TABLE `Playerlog` ADD FOREIGN KEY (`playerid`) REFERENCES `Users` (`id`);
 
 
 INSERT INTO Users (id, username) VALUES (-1, 'bot');
+

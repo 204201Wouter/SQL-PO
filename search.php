@@ -34,14 +34,18 @@ if ($_SESSION["loggedin"] == true)
     else 
     
     {
-    if (isset($_GET["sortbyusername"]) )
-    $sort = htmlspecialchars("username");
+    if (isset($_GET["sortbyusername"]) ) {
+    $sql = "SELECT * FROM stats JOIN users ON stats.user = users.id ORDER BY username";
+    }
+
     else if (isset($_GET["sortbyelo"]) )
-    $sort = htmlspecialchars("elo");
+    {
+    $sql = "SELECT * FROM stats JOIN users ON stats.user = users.id ORDER BY elo DESC";
+    }
 
-    else $sort = "username";
+    else
+    $sql = "SELECT * FROM stats JOIN users ON stats.user = users.id ORDER BY username";
 
-    $sql = "SELECT * FROM stats JOIN users ON stats.user = users.id ORDER BY $sort";
 
     }
 

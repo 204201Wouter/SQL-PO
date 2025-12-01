@@ -17,8 +17,9 @@ if ($_SESSION["loggedin"]  == true)
         die("Connection failed: " . $conn->connect_error);
     }
 
+    $id = htmlspecialchars($_GET["id"]);
 
-    $sql = "SELECT Users.username FROM players JOIN users ON players.user = users.id WHERE serverid = '".$_GET["id"]."'";
+    $sql = "SELECT Users.username FROM players JOIN users ON players.user = users.id WHERE serverid = '".$id."'";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
@@ -26,8 +27,8 @@ if ($_SESSION["loggedin"]  == true)
         }
     }
 
-    if ($conn->query("SELECT started FROM servers WHERE id = '".$_GET["id"]."'")->fetch_assoc()['started']) {
-        header("Location: game.php?id=".$_GET["id"]);
+    if ($conn->query("SELECT started FROM servers WHERE id = '".$id."'")->fetch_assoc()['started']) {
+        header("Location: game.php?id=".$id);
         exit();
     }
 }
@@ -38,8 +39,9 @@ else {
 
 function startServer() {
     global $conn;
+    global $id;
 
-    if ($_SESSION['username'] == $_GET['id']) {
+    if ($_SESSION['username'] == $id) {
         $hands = [[],[],[],[]];
         $kaartenvooropen = [[],[],[],[]];
         $kaartenvoorgesloten = [[],[],[],[]];
@@ -63,24 +65,24 @@ function startServer() {
         $stmt = $conn->prepare("UPDATE players SET hand = ?, kaartenvooropen = ?, kaartenvoorgesloten = ? WHERE id = ?");
         
         
-        $sql = "SELECT * FROM players WHERE serverid = '".$_GET["id"]."'";
+        $sql = "SELECT * FROM players WHERE serverid = '".$id."'";
         $result = $conn->query($sql);
         $numrows = $result->num_rows;
 
         for ($i = 0; $i < $numrows; $i++) {
             $row = $result->fetch_assoc();
-            if ($row['nummer'] != $i) $conn->query("UPDATE players SET nummer = $i WHERE serverid = '".$_GET["id"]."' AND id = '".$row['id']."'");
+            if ($row['nummer'] != $i) $conn->query("UPDATE players SET nummer = $i WHERE serverid = '".$id."' AND id = '".$row['id']."'");
         }
 
         $i = 0;
         for ($j = $numrows; $j < 4; $j++) {
             $k = -$j;
             $conn->query("INSERT INTO players (id, user, serverid, nummer, ready)
-            VALUES ($k, -1, '".$_GET['id']."', $j, 1)");
+            VALUES ($k, -1, '".$id."', $j, 1)");
         }
 
 
-        $sql = "SELECT * FROM players WHERE serverid = '".$_GET["id"]."'";
+        $sql = "SELECT * FROM players WHERE serverid = '".$id."'";
         $result = $conn->query($sql);
 
         
@@ -96,12 +98,12 @@ function startServer() {
 
 
         $sql = "INSERT INTO games (id, turn, stapel, pakstapel)
-        VALUES ('".$_GET['id']."',".$turn.",'[]','".json_encode($cards)."')";
+        VALUES ('".$id."',".$turn.",'[]','".json_encode($cards)."')";
         $result = $conn->query($sql);
 
-        $conn->query("UPDATE servers SET started = 1 WHERE id = '".$_GET["id"]."'");
+        $conn->query("UPDATE servers SET started = 1 WHERE id = '".$id."'");
 
-        header("Location: game.php?id=".$_GET["id"]);
+        header("Location: game.php?id=".$id);
         exit();
     }
     else echo "<br>You can't start the server if you are not the host.";

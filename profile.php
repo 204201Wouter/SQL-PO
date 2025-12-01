@@ -15,7 +15,7 @@ if ($_SESSION["loggedin"] == true)
         die("Connection failed: " . $conn->connect_error);
     }
 
-    $username = $_GET["username"];
+    $username = htmlspecialchars($_GET["username"]);
 
     // vaidate username
 

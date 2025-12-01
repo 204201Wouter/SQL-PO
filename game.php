@@ -103,8 +103,8 @@ if ($conn->connect_error) {
 }
 
 
-$gameid = $_GET['id'];
-$playerid = $_SESSION['id'];
+$gameid = htmlspecialchars($_GET['id']);
+$playerid = htmlspecialchars($_SESSION['id']);
 
 
 $game = $conn->query("SELECT * FROM games WHERE id = '$gameid'");

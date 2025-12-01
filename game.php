@@ -541,18 +541,18 @@ function goNextTurn(bool $win) {
 
         
         
-
         $conn->query("INSERT INTO gameslog (
-        player1, player1elo, player1elodiff, 
-        player2, player2elo, player2elodiff, 
-        player3, player3elo, player3elodiff, 
-        player4, player4elo, player4elodiff, date)
-        VALUES ('".$players[0][0]."', '".$players[0][1]."', '".$players[0][3]."',
-         '".$players[1][0]."', '".$players[1][1]."', '".$players[1][3]."',
-          '".$players[2][0]."', '".$players[2][1]."', '".$players[2][3]."',
-           '".$players[3][0]."', '".$players[3][1]."', '".$players[3][3]."',
            NOW()
            )");        
+           
+
+
+        $conn->query("INSERT INTO playerlog (
+        gameid,
+        playerid,
+        elo,
+        elodiff)
+        VALUES ('".$players[0][0]."', '".$players[0][1]."', '".$players[0][3]."')");        
     }
 
     else $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");

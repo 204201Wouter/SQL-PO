@@ -19,7 +19,7 @@ CREATE TABLE `Games` (
 );
 
 CREATE TABLE `Players` (
-  `id` integer PRIMARY KEY,
+  `id` integer PRIMARY KEY AUTO_INCREMENT,
   `user` integer,
   `hand` text,
   `kaartenvooropen` text,

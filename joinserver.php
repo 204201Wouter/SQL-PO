@@ -25,8 +25,8 @@ if ($_SESSION["loggedin"]  == true)
     $sql = "SELECT COUNT(*) FROM players WHERE serverid = '$gameid'";
     $playersjoined = $conn->query($sql)->fetch_assoc()["COUNT(*)"];
     
-    $sql = "INSERT INTO players (id, user, serverid, nummer, ready)
-    VALUES ('".$_SESSION['id']."', '".$_SESSION['id']."', '$gameid', $playersjoined, 0)";
+    $sql = "INSERT INTO players (user, serverid, nummer, ready)
+    VALUES ('".$_SESSION['id']."', '$gameid', $playersjoined, 0)";
     $result = $conn->query($sql);
     header("Location: lobby.php?id=".$gameid);
     exit();

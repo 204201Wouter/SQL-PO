@@ -36,7 +36,7 @@ if ($_SESSION["loggedin"]  == true)
         }
     }
 
-    if ($conn->query("SELECT started FROM servers WHERE id = '".$gameid."'")->fetch_assoc()['started']) {
+    if ($conn->query("SELECT started FROM servers WHERE id = '$gameid'")->fetch_assoc()['started']) {
         header("Location: game.php?id=".$gameid);
         exit();
     }
@@ -86,8 +86,8 @@ function startServer() {
         $i = 0;
         for ($j = $numrows; $j < 4; $j++) {
             $k = -$j;
-            $conn->query("INSERT INTO players (id, user, serverid, nummer, ready)
-            VALUES ($k, -1, '".$gameid."', $j, 1)");
+            $conn->query("INSERT INTO players (user, serverid, nummer, ready)
+            VALUES (-1, '".$gameid."', $j, 1)");
         }
 
 
@@ -101,7 +101,6 @@ function startServer() {
 
             $i++;
         }
-    
 
         $turn = 0;
 
@@ -127,7 +126,7 @@ function leaveServer() {
         $conn->query("DELETE FROM servers WHERE id = '$gameid'");
     }
     else {
-        $conn->query("DELETE FROM players WHERE id = ".$_SESSION['username']);
+        $conn->query("DELETE FROM players WHERE id = ".$_SESSION['id']);
     }
 
     header("Location: home.php?id=".$gameid);

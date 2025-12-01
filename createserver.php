@@ -14,7 +14,7 @@ if ($_SESSION["loggedin"]  == true)
         die("Connection failed: " . $conn->connect_error);
     }
 
-    $sql = "SELECT * FROM servers WHERE id = '".$_SESSION['username']."'";
+    $sql = "SELECT serverid FROM players WHERE id = '".$_SESSION['id']."'";
     $result = $conn->query($sql);
     if ($result->num_rows == 0) {
         $sql = "INSERT INTO servers (id, started)
@@ -25,7 +25,7 @@ if ($_SESSION["loggedin"]  == true)
         exit();
     }
 
-    header("Location: lobby.php?id=".$_SESSION['username']);
+    header("Location: lobby.php?id=".$result->fetch_assoc()['serverid']);
     exit();
 
     $conn->close();

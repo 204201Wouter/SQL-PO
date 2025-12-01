@@ -118,7 +118,7 @@ if ($game->num_rows == 0)
 $game = $game->fetch_assoc();
 
 
-$you = $conn->query("SELECT hand, nummer, kaartenvooropen, kaartenvoorgesloten FROM players WHERE id = '$playerid'")->fetch_assoc();
+$you = $conn->query("SELECT hand, nummer, kaartenvooropen, kaartenvoorgesloten FROM players WHERE user = '$playerid'")->fetch_assoc();
 
 $kaarten = $you['hand'];
 $kaartenvooropen = json_decode($you['kaartenvooropen']);
@@ -139,7 +139,7 @@ while ($row = $playersready->fetch_assoc()) {
 
 if ($started) echo "<script>wisselen=false;</script>";
 
-$ready = $conn->query("SELECT ready FROM players WHERE id = '$playerid'")->fetch_assoc()['ready'];
+$ready = $conn->query("SELECT ready FROM players WHERE user = '$playerid'")->fetch_assoc()['ready'];
 if ($ready) echo "<script>removereadybutton();</script>";
 
 //echo "jouw kaarten: <br>".$kaarten."<br>";
@@ -582,7 +582,7 @@ function playmove(array $move) {
         
         $conn->query("UPDATE games SET stapel = '" . json_encode($stapel) . "' WHERE id = '$gameid'");
         $conn->query("UPDATE games SET pakstapel = '" . json_encode($pakstapel) . "' WHERE id = '$gameid'");
-        $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
+        $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE user = '$playerid'");
 
         if (count($kaarten) < 3){
             if (count($kaartenvooropen) > 0){
@@ -595,8 +595,8 @@ function playmove(array $move) {
                     if (count($kaartenvoorgesloten) > 0) $kaarten[] = array_shift($kaartenvoorgesloten);
                 }
 
-                $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
-                $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE id = '$playerid'");
+                $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE user = '$playerid'");
+                $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE user = '$playerid'");
 
                 goNextTurn((count($kaarten)+count($kaartenvoorgesloten)) == 0);
             }
@@ -714,8 +714,8 @@ function pakKaartenVoor(array $input) {
         }
     }
 
-    $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
-    $conn->query("UPDATE players SET kaartenvooropen = '" . json_encode($kaartenvooropen) . "' WHERE id = '$playerid'");
+    $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE user = '$playerid'");
+    $conn->query("UPDATE players SET kaartenvooropen = '" . json_encode($kaartenvooropen) . "' WHERE user = '$playerid'");
 
     if (count($kaarten) >= 3) goNextTurn((count($kaarten)+count($kaartenvoorgesloten)) == 0);
     else if (count($kaartenvooropen) == 0) {
@@ -723,8 +723,8 @@ function pakKaartenVoor(array $input) {
             if (count($kaartenvoorgesloten) > 0) $kaarten[] = array_shift($kaartenvoorgesloten);
         }
 
-        $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
-        $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE id = '$playerid'");
+        $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE user = '$playerid'");
+        $conn->query("UPDATE players SET kaartenvoorgesloten = '" . json_encode($kaartenvoorgesloten) . "' WHERE user = '$playerid'");
 
         goNextTurn((count($kaarten)+count($kaartenvoorgesloten)) == 0);
     }
@@ -770,8 +770,8 @@ if (isset($_POST['playMove']) && $game['winner'] == null) {
                 $kaarten[] = $kaartvoor;
                 $kaartenvooropen[] = $kaarthand;
 
-                $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE id = '$playerid'");
-                $conn->query("UPDATE players SET kaartenvooropen = '" . json_encode($kaartenvooropen) . "' WHERE id = '$playerid'");
+                $conn->query("UPDATE players SET hand = '" . json_encode($kaarten) . "' WHERE user = '$playerid'");
+                $conn->query("UPDATE players SET kaartenvooropen = '" . json_encode($kaartenvooropen) . "' WHERE user = '$playerid'");
 
                 header("Refresh:0");
                 ob_end_flush();
@@ -786,7 +786,7 @@ if (isset($_POST['playMove']) && $game['winner'] == null) {
 }
 
 if (isset($_POST['ready'])){
-    $conn->query("UPDATE players SET ready = 1 WHERE id = '$playerid'");
+    $conn->query("UPDATE players SET ready = 1 WHERE user = '$playerid'");
     header("Refresh:0");
     ob_end_flush();
     exit();

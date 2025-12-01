@@ -21,7 +21,8 @@ if ($_SESSION["loggedin"] == true)
 
     echo "<div  style='text-align:center;'><h1>welkom ". $_SESSION['username']."!</h1> je elo is ".$result['elo']."<br><a href='createserver.php'>create server</a><br>
     <a href='findserver.php'>join server</a><br>
-    <a href='search.php'>stats</a><div>";
+    <a href='search.php'>stats</a><br>
+    <a href='uitleg.html'>uitleg</a><div>";
 
     $conn->close();
 

@@ -458,24 +458,6 @@ function updatestats(array $player)
     $result = $conn->query("UPDATE stats SET elo = $elo WHERE id = ".$player[0]);
     $result = $conn->query("UPDATE stats SET wins = $wins WHERE id = ".$player[0]);
     $result = $conn->query("UPDATE stats SET gamesplayed = $played WHERE id = ".$player[0]);
-
-    /*
-    E=1+10(Ropp​−Rplayer​)/4001​
-    S=points earned
-    R′=R+K(S−Etotal​)
-
-    RA′​=RA​+Kall opponents B∑​(SA,B​−EA,B​)
-
-    k = 20
-
-    E = 1/ (1+pow(10,((elo opp - elo player) /400))  for all players
-
-    s = 1 0.5 or 0 
-
-    delta = s-E all players
-
-    Elo += 20*delta
-    */
 }
 
 function goNextTurn(bool $win) {
@@ -529,8 +511,6 @@ function goNextTurn(bool $win) {
 
         foreach ($players as &$player)
         {
-     
-
             updatestats($player);
         }
 

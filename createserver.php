@@ -1,5 +1,5 @@
 <?php
-
+// (W3Schools, z.d.)
 session_start();
 ?>
 <html>

@@ -3,6 +3,7 @@
 </form>
 
 <?php
+// (W3Schools, z.d.)
 session_start();
 
 // verbind met database

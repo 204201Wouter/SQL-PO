@@ -1,4 +1,5 @@
 <?php 
+// (W3Schools, z.d.)
 session_start();
 ?>
 <head>
@@ -90,7 +91,7 @@ session_start();
 
 
 <?php 
-// de ob (output buffer) zorgt ervoor dat je de echo en de header functie allebei kan gebruiken
+// de ob (output buffer) zorgt ervoor dat je de echo en de header functie allebei kan gebruiken (W3Schools, z.d.)
 ob_start();
 
 // als niet ingelogd naar inlogpagina

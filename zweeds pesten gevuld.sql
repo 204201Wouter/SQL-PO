@@ -39,15 +39,19 @@ CREATE TABLE `Stats` (
 
 CREATE TABLE `Gameslog` (
   `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `` 
+  `player1` integer,
+  `player1elo` integer,
+  `player1elodiff` integer,
+  `player2` integer,
+  `player2elo` integer,
+  `player2elodiff` integer,
+  `player3` integer,
+  `player3elo` integer,
+  `player3elodiff` integer,
+  `player4` integer,
+  `player4elo` integer,
+  `player4elodiff` integer,
   `date` TEXT
-);
-
-CREATE TABLE `Playerlog` (
-  `id` integer PRIMARY KEY AUTO_INCREMENT,
-  `elo` integer,
-  `elodiff` integer,
-
 );
 
 ALTER TABLE `Servers` ADD FOREIGN KEY (`gameid`) REFERENCES `Games` (`id`);

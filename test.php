@@ -5,12 +5,14 @@
 <?php
 session_start();
 
+// verbind met database
 $conn = new mysqli("localhost", "root", "", "zweeds pesten");
-
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+
+// tijdelijk bestand voor deleten servers
 function test() {
     global $conn;
 

@@ -21,37 +21,26 @@ session_start();
 <?php
 if ($_SESSION["loggedin"] == true)
 {
+    // verbind met database
     $conn = new mysqli("localhost", "root", "", "zweeds pesten");
-
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
 
-    if (isset($_GET["username"]) && $_GET["username"] != null){
-    $id = htmlspecialchars($_GET["username"]);
-    $sql = "SELECT * FROM stats JOIN users ON stats.user = users.id WHERE users.username = '$id'";
+    if (isset($_GET["username"]) && $_GET["username"] != null) {
+        // als er username is ingevuld
+        $id = htmlspecialchars($_GET["username"]);
+        $sql = "SELECT * FROM stats JOIN users ON stats.user = users.id WHERE users.username = '$id'";
     }
-    else 
-    
-    {
-    if (isset($_GET["sortbyusername"]) ) {
-    $sql = "SELECT * FROM stats JOIN users ON stats.user = users.id ORDER BY username";
+    else {
+        // als er geen username is ingevuld
+        if (isset($_GET["sortbyelo"])) $sql = "SELECT * FROM stats JOIN users ON stats.user = users.id ORDER BY elo DESC";
+        else $sql = "SELECT * FROM stats JOIN users ON stats.user = users.id ORDER BY username";
     }
-
-    else if (isset($_GET["sortbyelo"]) )
-    {
-    $sql = "SELECT * FROM stats JOIN users ON stats.user = users.id ORDER BY elo DESC";
-    }
-
-    else
-    $sql = "SELECT * FROM stats JOIN users ON stats.user = users.id ORDER BY username";
-
-
-    }
-
 
     $result = $conn->query("$sql");
 
+    // laat alles zien
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             echo "<tr>";
@@ -69,8 +58,6 @@ else {
     exit();
 }
 ?>
-
-
 
 </table>
 

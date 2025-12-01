@@ -59,7 +59,7 @@ function startServer() {
         $kaartenvoorgesloten = [[],[],[],[]];
 
         $cards = [];
-        for ($i = 0; $i < 36;$i++)
+        for ($i = 0; $i < 54;$i++)
         {
             $cards[] = $i;
         }

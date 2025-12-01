@@ -6,13 +6,13 @@ session_start();
 <?php
 if ($_SESSION["loggedin"]  == true)
 {
-    // Create connection
+    // verbind met database
     $conn = new mysqli("localhost", "root", "", "zweeds pesten");
-    // Check connection
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
 
+    // check of je al in server zit
     $sql = "SELECT * FROM servers WHERE id = '".$_SESSION['username']."'";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
@@ -20,6 +20,7 @@ if ($_SESSION["loggedin"]  == true)
         exit();
     }
 
+    // laat alle nog niet gestartte servers zien
     $sql = "SELECT * FROM servers WHERE started = 0";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {

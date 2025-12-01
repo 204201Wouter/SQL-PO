@@ -1,41 +1,24 @@
 <?php 
-
-
 session_start();
-
-
 
 $username = htmlspecialchars($_POST["username"]);
 $password = htmlspecialchars($_POST["password"]);
 
-
-
-// Create connection
+// verbind met database
 $conn = new mysqli("localhost", "root", "", "zweeds pesten");
-// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// inlog logica
 $sql = "SELECT * FROM users WHERE username = '$username'";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0 && $username != 'bot') {
     $row = $result->fetch_assoc();
-    if ($row["password"] == $password)
-    {
+    if ($row["password"] == $password) {
         echo "succes login";
-
-        /*
-        $id = rand();
-        $usersWithId = $conn->query("SELECT * FROM users WHERE id = '$id'");
-        while ($usersWithId->num_rows > 0) {
-            $id = rand();
-            $usersWithId = $conn->query("SELECT * FROM users WHERE id = '$id'");
-        }
-
-        $conn->query("UPDATE users SET id = '$id' WHERE username = '$username'");
-        */
+        
         $_SESSION['loggedin'] = true;
         $_SESSION['id'] = $row['id'];
         $_SESSION['username'] = $username;
@@ -55,5 +38,4 @@ else {
 }
   
 $conn->close();
-
 ?>

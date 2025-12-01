@@ -6,6 +6,7 @@ session_start();
 <?php
 if ($_SESSION["loggedin"]  == true)
 {
+    // verbind met database
     $conn = new mysqli("localhost", "root", "", "zweeds pesten");
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
@@ -16,18 +17,21 @@ if ($_SESSION["loggedin"]  == true)
 
     $game = $conn->query("SELECT * FROM servers WHERE id = '$gameid'");
 
+    // als game niet bestaat ga terug naar home
     if ($game->num_rows == 0) 
     {
         header("Location: home.php");
         exit();
     }
     
+    // voeg jezelf toe aan database
     $sql = "SELECT COUNT(*) FROM players WHERE serverid = '$gameid'";
     $playersjoined = $conn->query($sql)->fetch_assoc()["COUNT(*)"];
     
     $sql = "INSERT INTO players (user, serverid, nummer, ready)
     VALUES ('".$_SESSION['id']."', '$gameid', $playersjoined, 0)";
-    $result = $conn->query($sql);
+    $conn->query($sql);
+    
     header("Location: lobby.php?id=".$gameid);
     exit();
 

@@ -50,7 +50,6 @@ session_start();
     {
         object.style.transform = "translate(-50%,-50%)";
         object.style.top = "50%";
-       // object.style.transform += ` translate(${end[0]-start[0]}px, ${end[1]-start[1]}px)`;
         console.log(object.style.left );
 
     }
@@ -65,8 +64,10 @@ session_start();
         }
 
         try {
+            // move die je heb geselecteerd
             let array = JSON.parse(input.value);
             
+            // checkt of je deze kaart kan selecteren
             if ((wisselen && !array.includes(text) && array.length < 2) || (pakken == kaartVoor && ((pakken && !array.includes(text)) || (!pakken && !array.includes(text) && (array.length == 0 || (array.length > 0 && getkaartfromid(array[0]) == getkaartfromid(text))))))) {
                 array.push(text);
                 input.value = JSON.stringify(array);
@@ -89,7 +90,10 @@ session_start();
 
 
 <?php 
+// de ob (output buffer) zorgt ervoor dat je de echo en de header functie allebei kan gebruiken
 ob_start();
+
+// als niet ingelogd naar inlogpagina
 if ($_SESSION["loggedin"] != true)
 {
     header("Location: inlog.php");
@@ -97,6 +101,7 @@ if ($_SESSION["loggedin"] != true)
     exit();
 }
 
+// verbind met database
 $conn = new mysqli("localhost", "root", "", "zweeds pesten");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -106,15 +111,16 @@ if ($conn->connect_error) {
 $gameid = htmlspecialchars($_GET['id']);
 $playerid = htmlspecialchars($_SESSION['id']);
 
-
 $game = $conn->query("SELECT * FROM games WHERE id = '$gameid'");
 
+// als je al in een game zit ga daar dan heen
 if ($game->num_rows == 0) 
 {
     header("Location: lobby.php?id=$gameid");
     ob_end_flush();
     exit();
 }
+
 $game = $game->fetch_assoc();
 
 
@@ -127,6 +133,7 @@ $yournummer = $you['nummer'];
 
 $cardsize = 65;
 
+// check of iedereen klaar is
 $started = true;
 $playersready = $conn->query("SELECT ready FROM players WHERE serverid = '$gameid'");
 while ($row = $playersready->fetch_assoc()) {
@@ -142,10 +149,9 @@ if ($started) echo "<script>wisselen=false;</script>";
 $ready = $conn->query("SELECT ready FROM players WHERE user = '$playerid'")->fetch_assoc()['ready'];
 if ($ready) echo "<script>removereadybutton();</script>";
 
-//echo "jouw kaarten: <br>".$kaarten."<br>";
 $kaarten = json_decode($kaarten);
 
-
+// check of je nog dingen moet pakken
 if (count($kaarten) >= 3 || count($kaartenvoorgesloten) == 0)  {
     echo "<script>pakken=false;</script>";
 }
@@ -224,22 +230,16 @@ function drawHand($kaarten, $hand, $height, $gesloten, $layer, $kaartvoor)
         $i++;
     }
 }
-
-
 echo "<div id='hand'>";
 
-
-// $margin*count($kaarten) = 1000
+// teken iedereens kaarten
 drawHand($kaarten, 0, 50, false, 0, "false");
 drawHand($kaartenvoorgesloten, 0, 150, true, 0, "true");
 drawHand($kaartenvooropen, 0, 150, false, 5, "true");
 
-
-
 $sql = "SELECT hand, kaartenvooropen, kaartenvoorgesloten FROM players WHERE serverid = '$gameid'";
 $result = $conn->query($sql);
 $row = $result->fetch_assoc();
-
 
 $enemykaarten = json_decode($row['hand']);
 if ($enemykaarten == $kaarten)
@@ -248,12 +248,9 @@ if ($enemykaarten == $kaarten)
     $enemykaarten = json_decode($row['hand']);  
 }
 
-
-
 drawHand($enemykaarten, 1, 50, true, 0, "false");
 drawHand(json_decode($row['kaartenvoorgesloten']), 1, 160, true, 0, "false");
 drawHand(json_decode($row['kaartenvooropen']), 1, 160, false, 5, "false");
-
 
 $row = $result->fetch_assoc();
 $enemykaarten = json_decode($row['hand']);
@@ -267,7 +264,6 @@ drawHand($enemykaarten, 2, 50, true, 0, "false");
 drawHand(json_decode($row['kaartenvoorgesloten']), 2, 160, true, 0, "false");
 drawHand(json_decode($row['kaartenvooropen']), 2, 160, false, 5, "false");
 
-
 $row = $result->fetch_assoc();
 $enemykaarten = json_decode($row['hand']);
 if ($enemykaarten == $kaarten)
@@ -279,8 +275,6 @@ if ($enemykaarten == $kaarten)
 drawHand($enemykaarten, 3, 50, true, 0, "false");
 drawHand(json_decode($row['kaartenvoorgesloten']), 3, 160, true, 0, "false");
 drawHand(json_decode($row['kaartenvooropen']), 3, 160, false, 5, "false");
-
-
 
 echo "</div>";
 
@@ -307,6 +301,7 @@ $result = $conn->query($sql)->fetch_assoc();
 
 $turnName = $result['username'];
 
+// informatieve tekst
 if (!$started) {
     if ($ready) echo "<meta http-equiv='refresh' content='2'>";
     echo "<br>Wachten tot iedereen klaar is...<br>Wissel je kaarten";
@@ -325,22 +320,22 @@ else {
     echo "<form method='post'><button type='submit' name='toLobby' id='lobbyButton' style='position:fixed;right:10;top:10;'>Return to lobby</button></form>";
 }
 
-// ------ IDs KAARTEN -------
+// ------- IDs KAARTEN -------
 // 0-12: HARTEN, 13-25: RUITEN, 26-38: SCHOPPEN, 39-51: KLAVERS
 // volgorde: 2 t/m 10, B, V, K, A
 // 52 en 53 zijn jokers
 
+// gets een kaart from een id
 function getkaartfromid($kaartid) {
     if ($kaartid > 51) return 13;
     else return $kaartid % 13;
 }
 
-
+// check welke kaart telt als bovenste
 if (count($stapel) > 0) {
     echo "<div id='stapel'>";
     $bovenstekaartid = end($stapel);
     $bovenstekaart = getkaartfromid($bovenstekaartid);
-
 
     $i = 2;
     while ($bovenstekaart == 1 || $bovenstekaart == 13) {
@@ -360,20 +355,20 @@ else {
     $bovenstekaart = -1;
 }
 
-
+// teken stapel
 $i = 0;
 $a = 0;
 foreach ($stapel as $kaart)
 {   
-    if (getkaartfromid($kaart) == 1 || getkaartfromid($kaart) == 13) {$a  = 10;}
-    else {$a = 0;}
+    if (getkaartfromid($kaart) == 1 || getkaartfromid($kaart) == 13) $a = 10;
+    else $a = 0;
     echo "<br><img src='images/" . $kaart . ".svg' style='
         width:".$cardsize."px;
         position:fixed;
         bottom:50%;
         left:50%;
         transform: translate(-50%,50%) translateY(" . $i-$a . "px);'>";
-        $i-= 3;
+    $i-= 3;
 }
 
 function possibleMove(array $move)  
@@ -412,6 +407,7 @@ function validCard(int $move) {
 
 function refillCards(bool $forPlayer) {
     global $pakstapel;
+
     if ($forPlayer) {
         global $kaarten;
         $localkaarten = $kaarten;
@@ -465,13 +461,14 @@ function goNextTurn(bool $win) {
     global $gameid;
     global $conn;
 
-
     $nextplayer = ($turn+1)%4;
 
-    if ($win)  {
+    // als iemand gewonnen heeft
+    if ($win) {
         $conn->query("UPDATE games SET winner = $turn WHERE id = '$gameid'"); 
         $conn->query("UPDATE servers SET started = 0 WHERE id = '$gameid'"); 
 
+        // update elo van alle spelers
         $sql = "SELECT user, hand, kaartenvooropen, kaartenvoorgesloten FROM players WHERE serverid = '$gameid'";
         $result = $conn->query($sql);
 
@@ -514,6 +511,7 @@ function goNextTurn(bool $win) {
             updatestats($player);
         }
 
+        // log he tspel
         $sql = "SELECT user FROM players WHERE serverid = '$gameid' AND nummer = $turn";
         $result = $conn->query($sql)->fetch_assoc();
 
@@ -529,7 +527,7 @@ function goNextTurn(bool $win) {
         elodiff)
         VALUES ($loggedgamesamount, '".$players[0][0]."', '".$players[0][1]."', '".$players[0][3]."')");        
     }
-
+    // als niemand gewonnen heeft update turn
     else $conn->query("UPDATE games SET turn = $nextplayer WHERE id = '$gameid'");
 
     header("Refresh:0");
@@ -550,18 +548,22 @@ function playmove(array $move) {
     global $kaartenvoorgesloten;
     global $playerid;
 
- 
+    // als jij aan de beurt bent
     if ($yournummer == $turn) {
+        // als je move mag
         if (count($move) > 0 && validCard($move[0]) && samecards($move)) {
+            // leg kaart op
             foreach ($move as $movekaart) {
                 $stapel[] = $movekaart;
                 array_splice($kaarten, array_search($movekaart, $kaarten), 1); 
             }
             
+            // delete stapel als kaart een 10 was
             if (getkaartfromid($move[0]) == 8) {
                 $stapel = [];
             }
 
+            // delete stapel als 4 dezelfde in stapel zitten
             for ($i = 0; $i < 13; $i++) {
                 if (in_array($i, $stapel) && in_array($i + 13, $stapel) && in_array($i + 26, $stapel) && in_array($i + 39, $stapel)) {
                     $stapel = [];
@@ -571,11 +573,13 @@ function playmove(array $move) {
         }
         else if (!possibleMove($kaarten))
         {
+            // pak de stapel
             foreach ($stapel as $kaart)
             {
                 $kaarten[] = array_shift($stapel);
             }
         }
+        // als move niet mag maar je wel een move kan stop de code
         else return null;
 
         refillCards(true);
@@ -591,6 +595,7 @@ function playmove(array $move) {
                 exit();
             }
             else if (count($kaartenvoorgesloten) > 0) {
+                // pak kaarten voor als dat moet
                 for ($i = 0; $i < 3 - count($kaarten); $i++) {
                     if (count($kaartenvoorgesloten) > 0) $kaarten[] = array_shift($kaartenvoorgesloten);
                 }
@@ -603,6 +608,7 @@ function playmove(array $move) {
             else goNextTurn((count($kaarten)+count($kaartenvoorgesloten)) == 0);
         }
         else goNextTurn((count($kaarten)+count($kaartenvoorgesloten)) == 0);
+        // parameter checkt of je gewonnen hebt
     }
 }
 
@@ -615,7 +621,6 @@ function botMove() {
     global $pakstapel;
     global $botkaarten;
 
-
     $sql = "SELECT hand, kaartenvooropen, kaartenvoorgesloten FROM players WHERE nummer = $turn AND serverid = '$gameid'";
     $result = $conn->query($sql)->fetch_assoc();
 
@@ -623,6 +628,7 @@ function botMove() {
     $botkaartenvooropen = json_decode($result['kaartenvooropen']);
     $botkaartenvoorgesloten = json_decode($result['kaartenvoorgesloten']);
     
+    // neem laagste kaart die geen 2 3 of joker is als bot die heeft
     $laagstekaart = 13;
     $bestekaartid = -1;
     foreach ($botkaarten as $kaart) {
@@ -635,6 +641,7 @@ function botMove() {
 
     $move = [];
     if ($bestekaartid != -1) {
+        // neem dan alle kaarten van die soort
         foreach ($botkaarten as $kaart) {
             if (getkaartfromid($kaart) == $bestekaartid) {
                 $move[] = $kaart;
@@ -642,6 +649,7 @@ function botMove() {
         }
     }
     else {
+        // als bot geen kaart heeft die kan check dan of bot 2 3 of joker heeft en neem daar dan 1 van
         foreach ($botkaarten as $kaart) {
             if (getkaartfromid($kaart) == 0) {
                 $move = [$kaart];
@@ -654,6 +662,7 @@ function botMove() {
     }
 
     if (count($move) > 0) {
+        // als bot kan speel dan move
         foreach ($move as $movekaart) {
             $stapel[] = $movekaart;
             array_splice($botkaarten, array_search($movekaart, $botkaarten), 1); 
@@ -671,6 +680,7 @@ function botMove() {
         }
     }
     else {
+        // anders pak stapel
         foreach ($stapel as $kaart)
         {
             $botkaarten[] = array_shift($stapel);
@@ -702,6 +712,7 @@ function pakKaartenVoor(array $input) {
     global $conn;
     global $playerid;
     
+    // check of geselecteerde kaarten goed zijn
     foreach ($input as $kaart) {
         if (in_array($kaart, $kaartenvooropen) && count($kaarten) < 3) {
             $kaarten[] = $kaart;
@@ -730,6 +741,7 @@ function pakKaartenVoor(array $input) {
     }
 }
 
+// check of bot aan de beurt is
 $result = $conn->query("SELECT * FROM players WHERE serverid = '$gameid' AND user = -1");
 $lowestbotnumber = 3;
 if ($result->num_rows > 0) {
@@ -738,18 +750,18 @@ if ($result->num_rows > 0) {
     }
 }
     
-
 if ($turn >= $lowestbotnumber && $game['winner'] == null && $started) {
-    //usleep(1000000);
     botMove();
 }
 
+// handle je input
 if (isset($_POST['playMove']) && $game['winner'] == null) {
     $value = json_decode($_POST['move']);
     if ((count($kaarten) >= 3 || count($kaartenvoorgesloten) == 0) && $started)  {
         playmove($value);
     }
     else if (!$started) {
+        // wissel geselecteerde kaarten
         if (count($value) == 2) {
             if (in_array($value[0], $kaarten) && in_array($value[1], $kaartenvooropen)){
                 $kaarthand = $value[0];

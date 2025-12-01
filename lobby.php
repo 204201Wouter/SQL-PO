@@ -11,34 +11,36 @@ session_start();
             <button type="submit" name="leaveServer">Leave server</button>
         </form>
 <?php
-if ($_SESSION["loggedin"]  == true)
+if ($_SESSION["loggedin"] == true)
 {
-    // Create connection
+    // verbind met database
     $conn = new mysqli("localhost", "root", "", "zweeds pesten");
-    // Check connection
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
 
-    $gameid = htmlspecialchars($_GET["id"]);
+    $gameid = htmlspecialchars($_GET["id"]); // htmlspecialchars zijn nodig want anders gaat iedereen de website hacken en dan gaan we allemaal dood
 
+    // als de server niet bestaat
     $result = $conn->query("SELECT * FROM servers WHERE id = '$gameid'");
     if ($result->num_rows == 0) {
         header("Location: home.php");
         exit();
     }
+    
+    // als spel al gestart is
+    if ($conn->query("SELECT started FROM servers WHERE id = '$gameid'")->fetch_assoc()['started']) {
+        header("Location: game.php?id=".$gameid);
+        exit();
+    }
 
+    // laat namen van gejoinde spelers zien
     $sql = "SELECT Users.username FROM players JOIN users ON players.user = users.id WHERE serverid = '".$gameid."'";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             if ($row['username'] != "bot") echo $row['username']."<br>";
         }
-    }
-
-    if ($conn->query("SELECT started FROM servers WHERE id = '$gameid'")->fetch_assoc()['started']) {
-        header("Location: game.php?id=".$gameid);
-        exit();
     }
 }
 else {
@@ -51,6 +53,7 @@ function startServer() {
     global $gameid;
 
     if ($_SESSION['username'] == $gameid) {
+        // genereer kaarten
         $hands = [[],[],[],[]];
         $kaartenvooropen = [[],[],[],[]];
         $kaartenvoorgesloten = [[],[],[],[]];
@@ -71,30 +74,30 @@ function startServer() {
             }
         }
 
+        // prepared statement om makkelijk meerdere keren bijna hetzelfde te doen
         $stmt = $conn->prepare("UPDATE players SET hand = ?, kaartenvooropen = ?, kaartenvoorgesloten = ? WHERE id = ?");
-        
         
         $sql = "SELECT * FROM players WHERE serverid = '".$gameid."'";
         $result = $conn->query($sql);
         $numrows = $result->num_rows;
 
+        // reset nummers en ready waarden
         for ($i = 0; $i < $numrows; $i++) {
             $row = $result->fetch_assoc();
             if ($row['nummer'] != $i) $conn->query("UPDATE players SET nummer = $i, ready = 0 WHERE serverid = '".$gameid."' AND id = '".$row['id']."'");
         }
 
-        $i = 0;
+        // maak bots
         for ($j = $numrows; $j < 4; $j++) {
             $k = -$j;
             $conn->query("INSERT INTO players (user, serverid, nummer, ready)
             VALUES (-1, '".$gameid."', $j, 1)");
         }
 
-
         $sql = "SELECT * FROM players WHERE serverid = '".$gameid."'";
         $result = $conn->query($sql);
-
         
+        $i = 0;
         while ($row = $result->fetch_assoc()) {
             $stmt->bind_param('sssi', json_encode($hands[$i]), json_encode($kaartenvooropen[$i]), json_encode($kaartenvoorgesloten[$i]), $row['id']);
             $stmt->execute();
@@ -104,7 +107,7 @@ function startServer() {
 
         $turn = 0;
 
-
+        // maak game
         $sql = "INSERT INTO games (id, turn, stapel, pakstapel)
         VALUES ('".$gameid."',".$turn.",'[]','".json_encode($cards)."')";
         $result = $conn->query($sql);
@@ -121,11 +124,13 @@ function leaveServer() {
     global $conn;
     global $gameid;
 
+    // als host delete server
     if ($_SESSION['username'] == $gameid) {
         $conn->query("DELETE FROM players WHERE serverid = '$gameid'");
         $conn->query("DELETE FROM servers WHERE id = '$gameid'");
     }
     else {
+        // anders leave server
         $conn->query("DELETE FROM players WHERE id = ".$_SESSION['id']);
     }
 

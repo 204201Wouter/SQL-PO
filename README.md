@@ -17,3 +17,4 @@ Rafael
 Voor het PO hebben we een lichtelijk ingewikkelde erd bedacht hierdoor hadden we niet heel veel tijd meer open voor de opmaak dus dat ziet er een beetje slecht uit. Het was wel leuk als de website werkte, maar daarna gingen we wat aanpassen en dan deed de website het niet. De website deed het vaker niet dan wel. 
 
 Wouter
+Ik heb het idee dat we voor dit PO de database 'creatief' hebben gebruikt. Ik had zelf nog nooit met zo'n soort database gewerkt, en het was voor mij ook nieuw om code te hebben die op deze manier op de server draait. Ik had eigenlijk verwacht dat dit project een stuk simpeler zou zijn, maar het was toch een stuk ingewikkelder dan ik dacht. Ik ben wel tevreden met het resultaat, ook al is de opmaak niet helemaal perfect.

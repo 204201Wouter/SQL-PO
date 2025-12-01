@@ -18,3 +18,4 @@ Voor het PO hebben we een lichtelijk ingewikkelde erd bedacht hierdoor hadden we
 
 Wouter
 Ik heb het idee dat we voor dit PO de database 'creatief' hebben gebruikt. Ik had zelf nog nooit met zo'n soort database gewerkt, en het was voor mij ook nieuw om code te hebben die op deze manier op de server draait. Ik had eigenlijk verwacht dat dit project een stuk simpeler zou zijn, maar het was toch een stuk ingewikkelder dan ik dacht. Ik ben wel tevreden met het resultaat, ook al is de opmaak niet helemaal perfect.
+PS: Als er onnodige enters staan of tabjes missen/te veel zijn is het de schuld van Rafael.

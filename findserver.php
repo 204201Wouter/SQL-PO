@@ -10,7 +10,14 @@ if ($_SESSION["loggedin"]  == true)
     $conn = new mysqli("localhost", "root", "", "zweeds pesten");
     // Check connection
     if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    $sql = "SELECT * FROM servers WHERE id = '".$_SESSION['username']."'";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        header("Location: lobby.php?id=".$_SESSION['username']);
+        exit();
     }
 
     $sql = "SELECT * FROM servers WHERE started = 0";
